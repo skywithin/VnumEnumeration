@@ -30,10 +30,10 @@ public abstract class Vnum : IEquatable<Vnum>
     /// invoking reflection, which can be computationally expensive. The cache uses a 
     /// <see cref="ConcurrentDictionary{TKey, TValue}"/> to ensure thread safety in multi-threaded environments.
     /// 
-    /// Note: This cache is static and internal, meaning it's shared across all instances of <see cref="Vnum"/>
+    /// Note: This cache is static, meaning it's shared across all instances of <see cref="Vnum"/>
     /// and is not accessible outside the assembly.
     /// </summary>
-    internal static readonly ConcurrentDictionary<Type, Array> _cache = new();
+    private static readonly ConcurrentDictionary<Type, Array> _cache = new();
 
     /// <summary>
     /// Gets the numeric value of the Vnum item.
@@ -69,7 +69,7 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Retrieves all Vnum instances of the specified <see cref="Vnum"/> type.
     /// </summary>
-    internal static Array GetAll(Type type)
+    private static Array GetAll(Type type)
     {
         //1. Validate the type parameter.
         if (type is null)

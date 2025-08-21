@@ -364,27 +364,6 @@ public class VnumTests
         Assert.Empty(actual);
     }
 
-    [Fact]
-    public void GetAll_Should_Return_All_Vnum_Instances()
-    {
-        // Act
-        var actual = Vnum.GetAll(typeof(TestVnum1));
-
-        // Assert
-        var expected = new[] { TestVnum1.OptionOne, TestVnum1.OptionTwo };
-        Assert.Equal(expected, actual);
-    }
-
-    [Fact]
-    public void GetAll_Given_Invalid_Type_Should_Throw_Exception()
-    {
-        // Act
-        var ex = Assert.Throws<ArgumentException>(() => Vnum.GetAll(typeof(NotVnum)));
-
-        // Assert
-        Assert.Equal("Type 'NotVnum' is not a valid Vnum type (Parameter 'type')", ex.Message);
-    }
-
 
     //┌────────────────────────────────────────────────────────────────────┐
     //│                             TEST DATA                              │
