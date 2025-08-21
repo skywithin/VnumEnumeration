@@ -1,6 +1,8 @@
-﻿namespace VnumEnumeration.Tests;
+﻿using VnumEnumeration.Tests.Data;
 
-public class VnumTests
+namespace VnumEnumeration.Tests;
+
+public class BaseVnumTests
 {
     [Fact]
     public void Constructor_Should_Initialize_Properties_Correctly()
@@ -166,39 +168,39 @@ public class VnumTests
     public void FromEnum_GivenValidEnumValue_ShouldReturnExpectedResult()
     {
         // Act
-        var actual = Vnum.FromEnum<TestVnum, TestVnumId>(TestVnumId.OptionOne);
+        var actual = Vnum.FromEnum<SampleVnum, SampleId>(SampleId.One);
 
         // Assert 
-        Assert.Equal(TestVnum.OptionOne, actual);
+        Assert.Equal(SampleVnum.One, actual);
     }
 
     [Fact]
     public void FromEnum_GivenInValidEnumValue_ShouldReturnExpectedResult()
     {
         // Act
-        var value = TestVnumId.OptionTwo;
+        var value = SampleId.Two;
 
         // Assert
-        var ex = Assert.Throws<InvalidOperationException>(() => Vnum.FromEnum<TestVnum, TestVnumId>(value));
-        Assert.Equal($"'{(int)value}' is not a valid value in TestVnum", ex.Message);
+        var ex = Assert.Throws<InvalidOperationException>(() => Vnum.FromEnum<BadSampleVnum, SampleId>(value));
+        Assert.Equal($"'{(int)value}' is not a valid value in {nameof(BadSampleVnum)}", ex.Message);
     }
 
     [Fact]
     public void TryFromEnum_GivenValidEnumValue_ShouldReturnTrue()
     {
         // Act
-        var actual = Vnum.TryFromEnum<TestVnum, TestVnumId>(TestVnumId.OptionOne, out var vnum);
+        var actual = Vnum.TryFromEnum<SampleVnum, SampleId>(SampleId.One, out var vnum);
 
         // Assert
         Assert.True(actual);
-        Assert.Equal(TestVnum.OptionOne, vnum);
+        Assert.Equal(SampleVnum.One, vnum);
     }
 
     [Fact]
     public void TryFromEnum_GivenInvalidEnumValue_ShouldReturnFalse()
     {
         // Act
-        var actual = Vnum.TryFromEnum<TestVnum, TestVnumId>(TestVnumId.OptionTwo, out var vnum);
+        var actual = Vnum.TryFromEnum<BadSampleVnum, SampleId>(SampleId.Two, out var vnum);
 
         // Assert
         Assert.False(actual);
@@ -364,68 +366,4 @@ public class VnumTests
         Assert.Empty(actual);
     }
 
-
-    //┌────────────────────────────────────────────────────────────────────┐
-    //│                             TEST DATA                              │
-    //└────────────────────────────────────────────────────────────────────┘
-
-    private sealed class NotVnum { }
-
-    private enum TestVnumId
-    {
-        OptionOne = 1,
-        OptionTwo = 2
-    }
-
-    private sealed class TestVnum : Vnum<TestVnumId>
-    {
-        public TestVnum() { }
-        private TestVnum(TestVnumId value, string code) : base(value, code) { }
-
-        public static readonly TestVnum OptionOne = new TestVnum(TestVnumId.OptionOne, "OptionOne");
-
-        //OptionTwo intentionally not implemented 
-    }
-
-    private sealed class TestVnum1 : Vnum
-    {
-        public static readonly TestVnum1 OptionOne = new TestVnum1(1, "OptionOne", "OptionOne_Description");
-        public static readonly TestVnum1 OptionTwo = new TestVnum1(2, "OptionTwo", "OptionTwo_Description");
-
-        public string CustomDescription { get; } = null!;
-        private string PrivateProp { get; } = "private";
-        internal string InternalProp { get; } = "internal";
-
-        public TestVnum1() { }
-        private TestVnum1(int value, string code, string customDescription) : base(value, code)
-        {
-            CustomDescription = customDescription;
-        }
-
-        public static TestVnum1 Stub(int value, string code) => new TestVnum1(value, code, customDescription: string.Empty);
-    }
-
-    private sealed class TestVnum2 : Vnum
-    {
-        public TestVnum2() { }
-        private TestVnum2(int value, string code) : base(value, code) { }
-    }
-
-    private sealed class TestVnum3 : Vnum
-    {
-        public static readonly TestVnum3 OptionOne = new TestVnum3(1, "OptionOne");
-
-        public TestVnum3() { }
-        private TestVnum3(int value, string code) : base(value, code)
-        {
-        }
-    }
-
-    private sealed class PrivateVnum : Vnum
-    {
-        private static readonly PrivateVnum HiddenOption = new PrivateVnum(1, "HiddenOption");
-
-        public PrivateVnum() { }
-        private PrivateVnum(int value, string code) : base(value, code) { }
-    }
 }
