@@ -30,10 +30,9 @@ public abstract class Vnum : IEquatable<Vnum>
     /// invoking reflection, which can be computationally expensive. The cache uses a 
     /// <see cref="ConcurrentDictionary{TKey, TValue}"/> to ensure thread safety in multi-threaded environments.
     /// 
-    /// Note: This cache is static, meaning it's shared across all instances of <see cref="Vnum"/>
-    /// and is not accessible outside the assembly.
+    /// Note: This cache is static, meaning it's shared across all instances of <see cref="Vnum"/>.
     /// </summary>
-    private static readonly ConcurrentDictionary<Type, Array> _cache = new();
+    private static readonly ConcurrentDictionary<Type, object[]> _cache = new();
 
     /// <summary>
     /// Gets the numeric value of the Vnum item.
@@ -66,10 +65,7 @@ public abstract class Vnum : IEquatable<Vnum>
         return predicate is null ? all : all.Where(predicate);
     }
 
-    /// <summary>
-    /// Retrieves all Vnum instances of the specified <see cref="Vnum"/> type.
-    /// </summary>
-    private static Array GetAll(Type type)
+    private static object[] GetAll(Type type)
     {
         //1. Validate the type parameter.
         if (type is null)
@@ -146,6 +142,12 @@ public abstract class Vnum : IEquatable<Vnum>
     }
 
     /// <summary>
+    /// Retrieves a Vnum instance by its code (case sensitive).
+    /// </summary>
+    public static T FromCode<T>(string code) where T : Vnum, new() =>
+        FromCode<T>(code, ignoreCase: false);
+
+    /// <summary>
     /// Attempts to retrieve a Vnum instance by its code.
     /// </summary>
     public static bool TryFromCode<T>(string code, bool ignoreCase, out T vnum) where T : Vnum, new() =>
@@ -184,7 +186,12 @@ public abstract class Vnum : IEquatable<Vnum>
             result = parseFunc();
             return true;
         }
-        catch (InvalidOperationException) // Narrow catch. Avoid masking catastrophic exceptions
+        catch (ArgumentNullException) // Narrow catch. Avoid masking catastrophic exceptions
+        {
+            result = null!;
+            return false;
+        }
+        catch (InvalidOperationException)
         {
             result = null!;
             return false;

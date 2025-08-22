@@ -47,12 +47,6 @@ public sealed class TestVnum1 : Vnum
     public static TestVnum1 Stub(int value, string code) => new (value, code, customDescription: string.Empty);
 }
 
-public sealed class TestVnum2 : Vnum
-{
-    public TestVnum2() { }
-    private TestVnum2(int value, string code) : base(value, code) { }
-}
-
 public sealed class TestVnum3 : Vnum
 {
     public static readonly TestVnum3 OptionOne = new (1, "OptionOne");

@@ -1,4 +1,5 @@
-﻿using VnumEnumeration.Tests.Data;
+﻿#nullable disable
+using VnumEnumeration.Tests.Data;
 
 namespace VnumEnumeration.Tests;
 
@@ -269,6 +270,17 @@ public class BaseVnumTests
         Assert.Null(vnum);
     }
 
+    [Fact]
+    public void TryFromCode_Given_Null_Should_Return_False_With_Null_Vnum()
+    {
+        // Act
+        var actual = Vnum.TryFromCode<TestVnum1>(code: null, out var vnum);
+
+        // Assert
+        Assert.False(actual);
+        Assert.Null(vnum);
+    }
+
     [Theory]
     [InlineData("optionone")]
     [InlineData("OPTIONONE")]
@@ -281,37 +293,6 @@ public class BaseVnumTests
         Assert.True(result);
         Assert.Equal(TestVnum1.OptionOne, vnum);
     }
-
-    //[Fact]
-    //public async Task GetAll_Should_Be_ThreadSafe()
-    //{
-    //    // Arrange: Clear the cache to ensure a clean state before the test.
-    //    Vnum.ClearCache();
-
-    //    // Act: This simulates a scenario where 100 threads attempt to access
-    //    // the Vnum instances simultaneously.
-    //    var tasks =
-    //        Enumerable.Range(0, 100).Select(_ =>
-    //            Task.Run(() =>
-    //            {
-    //                Vnum.GetAll<TestVnum1>();
-    //            }));
-
-    //    //Execute all tasks concurrently.
-
-    //    await Task.WhenAll(tasks);
-
-    //    //Task.WaitAll(tasks.ToArray());
-
-
-    //    //var exceptions = tasks.Where(t => t.IsFaulted).SelectMany(t => t.Exception.InnerExceptions).ToList();
-    //    //Assert.Empty(exceptions);
-
-    //    // Assert: The test ensures that the internal _cache dictionary, which
-    //    // is a shared resource, is thread-safe when accessed concurrently.
-    //    Assert.Single(Vnum._cache);
-    //    Assert.Equal(2, Vnum._cache[typeof(TestVnum1)].Length);
-    //}
 
     [Fact]
     public void GetAll_With_No_Predicate_Should_Return_All_Vnums()
