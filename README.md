@@ -1,7 +1,6 @@
-# VnumEnumeration
-<img width="391" height="449" alt="image" src="https://github.com/user-attachments/assets/61f43144-b67b-4c57-b44e-e276e3c9255d" />
+# Vnum
 
-[![NuGet](https://img.shields.io/nuget/v/VnumEnumeration.svg)](https://www.nuget.org/packages/VnumEnumeration/)
+[![NuGet](https://img.shields.io/nuget/v/Skywithin.VnumEnumeration.svg)](https://www.nuget.org/packages/Skywithin.VnumEnumeration/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 - Inspired by https://lostechies.com/jimmybogard/2008/08/12/enumeration-classes
@@ -10,17 +9,17 @@
 
 ### Package Manager
 ```powershell
-Install-Package VnumEnumeration
+Install-Package Skywithin.VnumEnumeration
 ```
 
 ### .NET CLI
 ```bash
-dotnet add package VnumEnumeration
+dotnet add package Skywithin.VnumEnumeration
 ```
 
 ### PackageReference
 ```xml
-<PackageReference Include="VnumEnumeration" Version="1.0.0" />
+<PackageReference Include="Skywithin.VnumEnumeration" Version="1.0.0" />
 ```
 
 ## Overview

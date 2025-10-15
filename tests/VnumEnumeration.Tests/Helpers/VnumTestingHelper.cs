@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace VnumEnumeration.Tests.Helpers;
+namespace Skywithin.VnumEnumeration.Tests.Helpers;
 
 public class VnumTestingHelper<TVnum, TEnum>
     where TVnum : Vnum<TEnum>, new()

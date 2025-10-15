@@ -1,8 +1,8 @@
 using System.Text.Json;
-using VnumEnumeration.Serialization;
-using VnumEnumeration.Tests.Data;
+using Skywithin.VnumEnumeration.Serialization;
+using Skywithin.VnumEnumeration.Tests.Data;
 
-namespace VnumEnumeration.Tests;
+namespace Skywithin.VnumEnumeration.Tests;
 
 public class VnumJsonConverterTests
 {

@@ -1,8 +1,8 @@
 ﻿using System;
-using VnumEnumeration.Tests.Data;
-using VnumEnumeration.Tests.Helpers;
+using Skywithin.VnumEnumeration.Tests.Data;
+using Skywithin.VnumEnumeration.Tests.Helpers;
 
-namespace VnumEnumeration.Tests;
+namespace Skywithin.VnumEnumeration.Tests;
 
 public class SampleVnumTests : VnumTestingHelper<SampleVnum, SampleId>
 {

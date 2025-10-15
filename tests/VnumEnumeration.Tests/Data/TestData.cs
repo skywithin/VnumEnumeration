@@ -1,4 +1,4 @@
-﻿namespace VnumEnumeration.Tests.Data;
+﻿namespace Skywithin.VnumEnumeration.Tests.Data;
 
 //┌────────────────────────────────────────────────────────────────────┐
 //│                             TEST DATA                              │

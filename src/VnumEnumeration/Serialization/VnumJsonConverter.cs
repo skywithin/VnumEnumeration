@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace VnumEnumeration.Serialization;
+namespace Skywithin.VnumEnumeration.Serialization;
 
 /// <summary>
 /// JSON converter for Vnum types that serializes to Code string and deserializes from Code or Value.

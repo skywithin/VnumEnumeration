@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace VnumEnumeration;
+namespace Skywithin.VnumEnumeration;
 
 public abstract class Vnum<TEnum> : Vnum where TEnum : struct, Enum
 {

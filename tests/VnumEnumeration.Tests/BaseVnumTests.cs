@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VnumEnumeration.Tests.Data;
+using Skywithin.VnumEnumeration.Tests.Data;
 
-namespace VnumEnumeration.Tests;
+namespace Skywithin.VnumEnumeration.Tests;
 
 public class BaseVnumTests
 {
