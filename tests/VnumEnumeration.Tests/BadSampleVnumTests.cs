@@ -1,4 +1,5 @@
-﻿using VnumEnumeration.Tests.Data;
+﻿using System;
+using VnumEnumeration.Tests.Data;
 using VnumEnumeration.Tests.Helpers;
 
 namespace VnumEnumeration.Tests;

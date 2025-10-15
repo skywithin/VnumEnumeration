@@ -4,6 +4,23 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    
+    <!-- NuGet Package Metadata -->
+    <PackageId>VnumEnumeration</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Max Vagner</Authors>
+    <Description>A strongly-typed smart enumeration base class with value-code pairs, reflection-based discovery, and JSON serialization support</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>enumeration;smart-enum;value-object;domain-driven-design</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/skywithin/VnumEnumeration</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/skywithin/VnumEnumeration</PackageProjectUrl>
   </PropertyGroup>
+
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

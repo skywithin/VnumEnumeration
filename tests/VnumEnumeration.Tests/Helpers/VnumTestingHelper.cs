@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace VnumEnumeration.Tests.Helpers;
 
@@ -62,7 +64,7 @@ public class VnumTestingHelper<TVnum, TEnum>
     public void All_Vnum_Instances_Must_Have_Matching_Enum()
     {
         // Arrange
-        var enumValues = Enum.GetValues<TEnum>();
+        var enumValues = (TEnum[])Enum.GetValues(typeof(TEnum));
 
         // Assert
         foreach (var vnumInstance in Vnum.GetAll<TVnum>())
@@ -80,7 +82,7 @@ public class VnumTestingHelper<TVnum, TEnum>
     /// </summary>
     public void All_Enum_Instances_Must_Convert_To_Vnum()
     {
-        foreach (var enumInstance in Enum.GetValues<TEnum>())
+        foreach (TEnum enumInstance in Enum.GetValues(typeof(TEnum)))
         {
             var vnum = Vnum.FromEnum<TVnum, TEnum>(enumInstance);
 
