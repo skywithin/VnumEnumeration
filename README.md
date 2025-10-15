@@ -1,4 +1,5 @@
 # VnumEnumeration
+<img width="391" height="449" alt="image" src="https://github.com/user-attachments/assets/61f43144-b67b-4c57-b44e-e276e3c9255d" />
 
 [![NuGet](https://img.shields.io/nuget/v/VnumEnumeration.svg)](https://www.nuget.org/packages/VnumEnumeration/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
