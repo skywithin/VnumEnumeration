@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -48,7 +46,7 @@ public class VnumJsonConverter<TVnum> : JsonConverter<TVnum> where TVnum : Vnum
         // Deserialize from numeric value (backward compatibility)
         if (reader.TokenType == JsonTokenType.Number)
         {
-            var value = reader.GetInt32();
+            var value = reader.GetInt64();
             
             if (Vnum.TryFromValue<TVnum>(value, out var vnum))
             {
