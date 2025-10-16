@@ -1,21 +1,77 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace Skywithin.VnumEnumeration;
 
+/// <summary>
+/// Represents a strongly-typed value-number (Vnum) associated with a specific enumeration type.
+/// </summary>
+/// <remarks>This class provides a type-safe way to associate an enum value with a Vnum, ensuring that only
+/// valid enumeration values are used. The <see cref="Id"/> property allows access to the enumeration value
+/// corresponding to the Vnum.</remarks>
+/// <typeparam name="TEnum">The enumeration type that defines the valid values for this Vnum. Must be a struct and an enumeration.</typeparam>
 public abstract class Vnum<TEnum> : Vnum where TEnum : struct, Enum
 {
     /// <summary>
     /// Gets the enumeration value of the Vnum item.
     /// </summary>
-    public TEnum Id => (TEnum)Enum.ToObject(typeof(TEnum), Value);
+    public TEnum Id => LongToEnum(Value);
 
-    protected Vnum() : base() { }
-    protected Vnum(int value, string code) : base(value, code) { }
-    protected Vnum(TEnum value, string code) : base(Convert.ToInt32(value), code) { }
+    protected Vnum(long value, string code) : base(value, code) { }
+    protected Vnum(TEnum value, string code) : base(EnumToLong(value), code) { }
+
+    /// <summary>
+    /// Converts an enum value to its long representation based on the enum's underlying type.
+    /// </summary>
+    internal static long EnumToLong(TEnum value)
+    {
+        var underlyingType = Enum.GetUnderlyingType(typeof(TEnum));
+        var typeCode = Type.GetTypeCode(underlyingType);
+
+        return typeCode switch
+        {
+            TypeCode.SByte => (long)(sbyte)(object)value,
+            TypeCode.Byte => (long)(byte)(object)value,
+            TypeCode.Int16 => (long)(short)(object)value,
+            TypeCode.UInt16 => (long)(ushort)(object)value,
+            TypeCode.Int32 => (long)(int)(object)value,
+            TypeCode.UInt32 => (long)(uint)(object)value,
+            TypeCode.Int64 => (long)(object)value,
+            TypeCode.UInt64 => ConvertUInt64((ulong)(object)value),
+            _ => throw new NotSupportedException($"Unsupported enum underlying type: {underlyingType}")
+        };
+
+        static long ConvertUInt64(ulong v)
+        {
+            if (v > long.MaxValue)
+                throw new OverflowException($"Enum value exceeds Int64.MaxValue.");
+            return (long)v;
+        }
+    }
+
+    /// <summary>
+    /// Converts a long value back to the enum type based on the enum's underlying type.
+    /// </summary>
+    private static TEnum LongToEnum(long value)
+    {
+        var underlyingType = Enum.GetUnderlyingType(typeof(TEnum));
+        var typeCode = Type.GetTypeCode(underlyingType);
+
+        object convertedValue = typeCode switch
+        {
+            TypeCode.SByte => Convert.ToSByte(value),
+            TypeCode.Byte => Convert.ToByte(value),
+            TypeCode.Int16 => Convert.ToInt16(value),
+            TypeCode.UInt16 => Convert.ToUInt16(value),
+            TypeCode.Int32 => Convert.ToInt32(value),
+            TypeCode.UInt32 => Convert.ToUInt32(value),
+            TypeCode.Int64 => Convert.ToInt64(value),
+            TypeCode.UInt64 => Convert.ToUInt64(value),
+            _ => throw new NotSupportedException($"Unsupported enum underlying type: {underlyingType}")
+        };
+
+        return (TEnum)Enum.ToObject(typeof(TEnum), convertedValue);
+    }
 }
 
 /// <summary>
@@ -40,18 +96,22 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Gets the numeric value of the Vnum item.
     /// </summary>
-    public int Value { get; }
+    public long Value { get; }
 
     /// <summary>
     /// Gets the string code of the Vnum item.
     /// </summary>
     public string Code { get; } = null!;
 
-    protected Vnum() { } // Required for reflection
-    protected Vnum(int value, string code)
+    protected Vnum(long value, string code)
     {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            throw new ArgumentException("Code cannot be null or whitespace", nameof(code));
+        }
+
         Value = value;
-        Code = code ?? throw new ArgumentNullException(nameof(code));
+        Code = code;
     }
 
     /// <summary>
@@ -60,11 +120,11 @@ public abstract class Vnum : IEquatable<Vnum>
     public override string ToString() => Code;
 
     /// <summary>
-    /// Retrieves all Vnum instances of a given type <typeparamref name="T"/>.
+    /// Retrieves all Vnum instances of a given type <typeparamref name="TVnum"/>.
     /// </summary>
-    public static IEnumerable<T> GetAll<T>(Func<T, bool>? predicate = null) where T : Vnum, new()
+    public static IEnumerable<TVnum> GetAll<TVnum>(Func<TVnum, bool>? predicate = null) where TVnum : Vnum
     {
-        var all = GetAll(typeof(T)).Cast<T>();
+        var all = GetAll(typeof(TVnum)).Cast<TVnum>();
         return predicate is null ? all : all.Where(predicate);
     }
 
@@ -99,8 +159,8 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Retrieves a Vnum instance by its numeric value.
     /// </summary>
-    public static T FromValue<T>(int value) where T : Vnum, new() =>
-        Parse<T, int>(
+    public static TVnum FromValue<TVnum>(long value) where TVnum : Vnum =>
+        Parse<TVnum, long>(
             value: value,
             description: nameof(value),
             predicate: item => item.Value == value);
@@ -108,31 +168,36 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Attempts to retrieve a Vnum instance by its numeric value.
     /// </summary>
-    public static bool TryFromValue<T>(int value, out T vnum) where T : Vnum, new() =>
+    public static bool TryFromValue<T>(long value, out T vnum) where T : Vnum =>
         TryParse(() => FromValue<T>(value), out vnum);
 
     /// <summary>
     /// Retrieves a Vnum instance by its enum value.
     /// </summary>
     public static TVnum FromEnum<TVnum, TEnum>(TEnum value)
-        where TVnum : Vnum<TEnum>, new()
+        where TVnum : Vnum<TEnum>
         where TEnum : struct, Enum
-        => FromValue<TVnum>(Convert.ToInt32(value));
+        => FromValue<TVnum>(Vnum<TEnum>.EnumToLong(value));
 
     /// <summary>
     /// Attempts to retrieve a Vnum instance by its enum value.
     /// </summary>
     public static bool TryFromEnum<TVnum, TEnum>(TEnum value, out TVnum vnum)
-        where TVnum : Vnum<TEnum>, new()
+        where TVnum : Vnum<TEnum>
         where TEnum : struct, Enum
-        => TryParse(() => FromValue<TVnum>(Convert.ToInt32(value)), out vnum);
+        => TryParse(() => FromValue<TVnum>(Vnum<TEnum>.EnumToLong(value)), out vnum);
 
     /// <summary>
     /// Retrieves a Vnum instance by its code.
     /// </summary>
-    public static T FromCode<T>(string code, bool ignoreCase = false) where T : Vnum, new()
+    public static TVnum FromCode<TVnum>(string code, bool ignoreCase = false) where TVnum : Vnum
     {
-        Func<T, bool> predicate =
+        if (code is null)
+        {
+            throw new ArgumentNullException(nameof(code));
+        }
+
+        Func<TVnum, bool> predicate =
             (item) =>
                 ignoreCase
                     ? item.Code.Equals(code, StringComparison.OrdinalIgnoreCase)
@@ -145,58 +210,54 @@ public abstract class Vnum : IEquatable<Vnum>
     }
 
     /// <summary>
-    /// Retrieves a Vnum instance by its code (case sensitive).
-    /// </summary>
-    public static T FromCode<T>(string code) where T : Vnum, new() =>
-        FromCode<T>(code, ignoreCase: false);
-
-    /// <summary>
     /// Attempts to retrieve a Vnum instance by its code.
     /// </summary>
-    public static bool TryFromCode<T>(string code, bool ignoreCase, out T vnum) where T : Vnum, new() =>
-        TryParse(() => FromCode<T>(code, ignoreCase), out vnum);
+    public static bool TryFromCode<TVnum>(string code, bool ignoreCase, out TVnum vnum) where TVnum : Vnum =>
+        TryParse(() => FromCode<TVnum>(code, ignoreCase), out vnum);
 
     /// <summary>
     /// Attempts to retrieve a Vnum instance by its code (case sensitive).
     /// </summary>
-    public static bool TryFromCode<T>(string code, out T vnum) where T : Vnum, new() =>
+    public static bool TryFromCode<TVnum>(string code, out TVnum vnum) where TVnum : Vnum =>
         TryFromCode(code, ignoreCase: false, out vnum);
 
-    /// <summary>
-    /// Parses a Vnum instance based on a specified predicate.
-    /// This method is used internally to find a matching Vnum item.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if no matching Vnum instance is found.</exception>
-    private static T Parse<T, K>(
+    // Parses a Vnum instance based on a specified predicate. This method is used internally to find a matching Vnum item.
+    private static TVnum Parse<TVnum, K>(
         K value,
         string description,
-        Func<T, bool> predicate) where T : Vnum, new()
+        Func<TVnum, bool> predicate) where TVnum : Vnum
     {
-        var matchingItem = GetAll<T>().FirstOrDefault(predicate);
+        var matchingItem = GetAll<TVnum>().FirstOrDefault(predicate);
 
         if (matchingItem is null)
         {
-            throw new InvalidOperationException($"'{value}' is not a valid {description} in {typeof(T).Name}");
+            throw new InvalidOperationException($"'{value}' is not a valid {description} in {typeof(TVnum).Name}");
         }
 
         return matchingItem;
     }
 
-    private static bool TryParse<T>(Func<T> parseFunc, out T result) where T : Vnum, new()
+    // Attempts to parse a value of type <typeparamref name="T"/> using the specified parsing function.
+    private static bool TryParse<TVnum>(Func<TVnum> parseFunc, out TVnum vnum) where TVnum : Vnum
     {
         try
         {
-            result = parseFunc();
+            vnum = parseFunc();
             return true;
         }
         catch (ArgumentNullException) // Narrow catch. Avoid masking catastrophic exceptions
         {
-            result = null!;
+            vnum = null!;
+            return false;
+        }
+        catch (ArgumentException)
+        {
+            vnum = null!;
             return false;
         }
         catch (InvalidOperationException)
         {
-            result = null!;
+            vnum = null!;
             return false;
         }
     }
@@ -220,4 +281,10 @@ public abstract class Vnum : IEquatable<Vnum>
     /// Returns the hash code for the Vnum item, based on its value.
     /// </summary>
     public override int GetHashCode() => HashCode.Combine(GetType(), Value);
+
+    public static bool operator ==(Vnum? left, Vnum? right) =>
+    left?.Equals(right) ?? right is null;
+
+    public static bool operator !=(Vnum? left, Vnum? right) =>
+        !(left == right);
 }

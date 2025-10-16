@@ -350,4 +350,115 @@ public class BaseVnumTests
         Assert.Empty(actual);
     }
 
+    [Fact]
+    public void EqualityOperator_SameInstance_ShouldBeEqual()
+    {
+        var vnum1 = SampleVnum.One;
+        var vnum2 = SampleVnum.One;
+        Assert.True(vnum1 == vnum2);
+    }
+
+    [Fact]
+    public void EqualityOperator_SameValue_ShouldBeEqual()
+    {
+        var vnum1 = Vnum.FromValue<SampleVnum>(1L);
+        var vnum2 = Vnum.FromValue<SampleVnum>(1L);
+        Assert.True(vnum1 == vnum2);
+    }
+
+    [Fact]
+    public void EqualityOperator_DifferentValues_ShouldNotBeEqual()
+    {
+        var vnum1 = Vnum.FromValue<SampleVnum>(1L);
+        var vnum2 = Vnum.FromValue<SampleVnum>(2L);
+        Assert.False(vnum1 == vnum2);
+    }
+
+    [Fact]
+    public void EqualityOperator_NullComparison_ShouldWork()
+    {
+        SampleVnum? vnum1 = null;
+        SampleVnum? vnum2 = null;
+        SampleVnum? vnum3 = SampleVnum.One;
+
+        Assert.True(vnum1 == vnum2);
+        Assert.False(vnum1 == vnum3);
+        Assert.False(vnum3 == vnum1);
+    }
+
+    [Fact]
+    public void EqualityOperator_OneNull_ShouldNotBeEqual()
+    {
+        SampleVnum? vnum1 = null;
+        var vnum2 = SampleVnum.One;
+
+        Assert.False(vnum1 == vnum2);
+        Assert.False(vnum2 == vnum1);
+    }
+
+    [Fact]
+    public void InequalityOperator_ShouldBeOppositeOfEquality()
+    {
+        var vnum1 = Vnum.FromValue<SampleVnum>(1L);
+        var vnum2 = Vnum.FromValue<SampleVnum>(2L);
+        var vnum3 = Vnum.FromValue<SampleVnum>(1L);
+
+        Assert.True(vnum1 != vnum2);
+        Assert.False(vnum1 != vnum3);
+    }
+
+    [Fact]
+    public void InequalityOperator_NullComparison_ShouldWork()
+    {
+        SampleVnum? vnum1 = null;
+        SampleVnum? vnum2 = null;
+        SampleVnum? vnum3 = SampleVnum.One;
+
+        Assert.False(vnum1 != vnum2);
+        Assert.True(vnum1 != vnum3);
+        Assert.True(vnum3 != vnum1);
+    }
+
+    [Fact]
+    public void EqualityOperator_ConsistencyWithEquals_ShouldMatch()
+    {
+        var vnum1 = Vnum.FromValue<SampleVnum>(1L);
+        var vnum2 = Vnum.FromValue<SampleVnum>(1L);
+        var vnum3 = Vnum.FromValue<SampleVnum>(2L);
+
+        // Equality operator should match Equals method
+        Assert.Equal(vnum1 == vnum2, vnum1.Equals(vnum2));
+        Assert.Equal(vnum1 == vnum3, vnum1.Equals(vnum3));
+    }
+
+    [Fact]
+    public void EqualityOperator_StaticInstances_ShouldBeEqual()
+    {
+        var vnum1 = SampleVnum.One;
+        var vnum2 = SampleVnum.One;
+
+        Assert.True(vnum1 == vnum2);
+        Assert.False(vnum1 != vnum2);
+    }
+
+    [Fact]
+    public void EqualityOperator_DifferentStaticInstances_ShouldNotBeEqual()
+    {
+        var vnum1 = SampleVnum.One;
+        var vnum2 = SampleVnum.Two;
+
+        Assert.False(vnum1 == vnum2);
+        Assert.True(vnum1 != vnum2);
+    }
+
+    [Fact]
+    public void EqualityOperator_DifferentTypes_ShouldNotBeEqual()
+    {
+        var sampleVnum = SampleVnum.One;
+        var badSampleVnum = BadSampleVnum.One;
+
+        // Different types should not be equal even with same value
+        Assert.False(sampleVnum == badSampleVnum);
+        Assert.True(sampleVnum != badSampleVnum);
+    }
 }

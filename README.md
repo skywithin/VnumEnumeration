@@ -30,10 +30,11 @@ This library supports .NET 9.0+ and leverages modern C# features for performance
 
 ## Purpose
 
-- **Strongly-Typed Enumerations**: Define custom types that encapsulate an integer value and a string code, similar to enums but with extensibility.
+- **Strongly-Typed Enumerations**: Define custom types that encapsulate a long integer value and a string code, similar to enums but with extensibility.
 - **Reflection-Based Discovery**: Retrieve all instances of a Vnum type using reflection, with thread-safe caching for performance.
 - **Flexible Lookup**: Find Vnum instances by value, code, or enum, with both strict and try-based methods.
 - **Type Safety**: Generic support for enum-backed Vnum types via `Vnum<TEnum>`.
+- **Universal Enum Support**: Supports all enum underlying types (byte, sbyte, short, ushort, int, uint, long, ulong).
 - **JSON Serialization**: Built-in support for JSON serialization with `System.Text.Json`.
 
 ## Key Features
@@ -41,7 +42,7 @@ This library supports .NET 9.0+ and leverages modern C# features for performance
 - **Value and Code**: Each Vnum instance has an integer value and a string code.
 - **Static Lookup Methods**:
   - `GetAll<T>()`: Get all instances of a Vnum type.
-  - `FromValue<T>(int value)`: Get instance by value.
+  - `FromValue<T>(long value)`: Get instance by value.
   - `FromCode<T>(string code)`: Get instance by code.
   - `FromEnum<TVnum, TEnum>(TEnum value)`: Get instance by enum value.
   - `TryFromValue`, `TryFromCode`, `TryFromEnum`: Safe lookup variants.
@@ -131,8 +132,10 @@ var json = "{\"Id\":1,\"Status\":1}";
 var order = JsonSerializer.Deserialize<Order>(json, options);
 ```
 
+## Limitations
+
+- **ULong Overflow**: `ulong` enum values exceeding `long.MaxValue` will throw `OverflowException`
+
 ## Supported Frameworks
 
 - .NET 9.0+
-
-

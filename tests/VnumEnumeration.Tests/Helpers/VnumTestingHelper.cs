@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Skywithin.VnumEnumeration.Tests.Helpers;
 
 public class VnumTestingHelper<TVnum, TEnum>
-    where TVnum : Vnum<TEnum>, new()
+    where TVnum : Vnum<TEnum>
     where TEnum : struct, Enum
 {
     /// <summary>
@@ -14,7 +12,7 @@ public class VnumTestingHelper<TVnum, TEnum>
     /// </summary>
     public void Vnum_Instances_Must_Have_Unique_Values()
     {
-        var hashSet = new HashSet<int>();
+        var hashSet = new HashSet<long>();
 
         foreach (TVnum item in Vnum.GetAll<TVnum>())
         {

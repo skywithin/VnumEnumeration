@@ -9,7 +9,7 @@ namespace Skywithin.VnumEnumeration.Serialization;
 /// JSON converter for Vnum types that serializes to Code string and deserializes from Code or Value.
 /// Deserialization is case-sensitive by default.
 /// </summary>
-public class VnumJsonConverter<TVnum> : JsonConverter<TVnum> where TVnum : Vnum, new()
+public class VnumJsonConverter<TVnum> : JsonConverter<TVnum> where TVnum : Vnum
 {
     /// <summary>
     /// Reads and converts a JSON value to an instance of the specified <see cref="TVnum"/> type.
