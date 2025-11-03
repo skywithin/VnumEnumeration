@@ -1,0 +1,77 @@
+name: Pre-release Publish to NuGet
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pre-release-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    # Extract base version from csproj file
+    - name: Extract base version from csproj
+      id: get_base_version
+      run: |
+        VERSION=$(grep -oP '<Version>\K[^<]+' src/Shift/Shift.csproj 2>/dev/null || grep '<Version>' src/Shift/Shift.csproj | sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p')
+        # Strip any existing pre-release suffix to get clean base version
+        VERSION=$(echo "$VERSION" | sed 's/-.*$//')
+        echo "BASE_VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Base version: $VERSION"
+
+    # Get PR number from merged PR
+    - name: Get PR number from merged PR
+      id: get_pr_number
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: pulls } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            commit_sha: context.sha,
+          });
+          
+          if (pulls && pulls.length > 0) {
+            const prNumber = pulls[0].number;
+            core.setOutput('pr_number', prNumber);
+            console.log(`Found PR number: ${prNumber}`);
+          } else {
+            core.setFailed('No PR found - direct pushes should be blocked by branch protection');
+          }
+
+    # Determine final pre-release version
+    - name: Determine pre-release version
+      id: set_version
+      run: |
+        BASE_VERSION="${{ steps.get_base_version.outputs.BASE_VERSION }}"
+        PR_NUMBER="${{ steps.get_pr_number.outputs.pr_number }}"
+        REVISION="${{ github.run_number }}"
+        FINAL_VERSION="${BASE_VERSION}-rc-${PR_NUMBER}.${REVISION}"
+        echo "VERSION=$FINAL_VERSION" >> $GITHUB_OUTPUT
+        echo "Pre-release version: $FINAL_VERSION"
+        
+    - name: Restore dependencies
+      run: dotnet restore src/Shift.slnx
+      
+    - name: Build solution
+      run: dotnet build src/Shift.slnx --configuration Release --no-restore
+      
+    - name: Run tests
+      run: dotnet test src/test/Shift.Tests/Shift.Tests.csproj --configuration Release --no-build --verbosity normal
+      
+    - name: Pack NuGet package
+      run: dotnet pack src/Shift/Shift.csproj --configuration Release --no-build --output ./nupkgs -p:Version=${{ steps.set_version.outputs.VERSION }}
+      
+    - name: Push to NuGet.org
+      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

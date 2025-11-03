@@ -8,7 +8,7 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>Skywithin.VnumEnumeration</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Authors>Max Vagner</Authors>
     <Description>A strongly-typed smart enumeration base class with value-code pairs, reflection-based discovery, and JSON serialization support</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
