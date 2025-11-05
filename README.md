@@ -56,7 +56,6 @@ This library supports .NET 9.0+ and leverages modern C# features for performance
 ```csharp
 public sealed class OrderStatus : Vnum
 {
-    public OrderStatus() { }
     private OrderStatus(int value, string code) : base(value, code) { }
 
     public static readonly OrderStatus Pending = new(1, "PENDING");
@@ -79,7 +78,6 @@ public enum StatusId
 
 public sealed class OrderStatus : Vnum<StatusId>
 {
-    public OrderStatus() { }
     private OrderStatus(StatusId value, string code) : base(value, code) { }
 
     public static readonly OrderStatus Pending = new(StatusId.Pending, "PENDING");
