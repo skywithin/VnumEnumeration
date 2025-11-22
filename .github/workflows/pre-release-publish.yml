@@ -28,34 +28,13 @@ jobs:
         echo "BASE_VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "Base version: $VERSION"
 
-    # Get PR number from merged PR
-    - name: Get PR number from merged PR
-      id: get_pr_number
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const { data: pulls } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            commit_sha: context.sha,
-          });
-          
-          if (pulls && pulls.length > 0) {
-            const prNumber = pulls[0].number;
-            core.setOutput('pr_number', prNumber);
-            console.log(`Found PR number: ${prNumber}`);
-          } else {
-            core.setFailed('No PR found - direct pushes should be blocked by branch protection');
-          }
-
     # Determine final pre-release version
     - name: Determine pre-release version
       id: set_version
       run: |
         BASE_VERSION="${{ steps.get_base_version.outputs.BASE_VERSION }}"
-        PR_NUMBER="${{ steps.get_pr_number.outputs.pr_number }}"
         REVISION="${{ github.run_number }}"
-        FINAL_VERSION="${BASE_VERSION}-rc-${PR_NUMBER}.${REVISION}"
+        FINAL_VERSION="${BASE_VERSION}-rc.${REVISION}"
         echo "VERSION=$FINAL_VERSION" >> $GITHUB_OUTPUT
         echo "Pre-release version: $FINAL_VERSION"
         
