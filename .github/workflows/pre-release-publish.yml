@@ -16,13 +16,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
 
     # Extract base version from csproj file
     - name: Extract base version from csproj
       id: get_base_version
       run: |
-        VERSION=$(grep -oP '<Version>\K[^<]+' src/Shift/Shift.csproj 2>/dev/null || grep '<Version>' src/Shift/Shift.csproj | sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p')
+        VERSION=$(grep -oP '<Version>\K[^<]+' src/VnumEnumeration/VnumEnumeration.csproj 2>/dev/null || grep '<Version>' src/VnumEnumeration/VnumEnumeration.csproj | sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p')
         # Strip any existing pre-release suffix to get clean base version
         VERSION=$(echo "$VERSION" | sed 's/-.*$//')
         echo "BASE_VERSION=$VERSION" >> $GITHUB_OUTPUT
@@ -60,16 +60,16 @@ jobs:
         echo "Pre-release version: $FINAL_VERSION"
         
     - name: Restore dependencies
-      run: dotnet restore src/Shift.slnx
+      run: dotnet restore VnumEnumeration.sln
       
     - name: Build solution
-      run: dotnet build src/Shift.slnx --configuration Release --no-restore
+      run: dotnet build VnumEnumeration.sln --configuration Release --no-restore
       
     - name: Run tests
-      run: dotnet test src/test/Shift.Tests/Shift.Tests.csproj --configuration Release --no-build --verbosity normal
+      run: dotnet test tests/VnumEnumeration.Tests/VnumEnumeration.Tests.csproj --configuration Release --no-build --verbosity normal
       
     - name: Pack NuGet package
-      run: dotnet pack src/Shift/Shift.csproj --configuration Release --no-build --output ./nupkgs -p:Version=${{ steps.set_version.outputs.VERSION }}
+      run: dotnet pack src/VnumEnumeration/VnumEnumeration.csproj --configuration Release --no-build --output ./nupkgs -p:Version=${{ steps.set_version.outputs.VERSION }}
       
     - name: Push to NuGet.org
       run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
