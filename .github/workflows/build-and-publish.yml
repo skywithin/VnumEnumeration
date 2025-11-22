@@ -24,10 +24,10 @@ jobs:
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
         
     - name: Restore dependencies
-      run: dotnet restore VnumEnumeration.sln
+      run: dotnet restore VnumEnumeration.slnx
       
     - name: Build solution
-      run: dotnet build VnumEnumeration.sln --configuration Release --no-restore
+      run: dotnet build VnumEnumeration.slnx --configuration Release --no-restore
       
     - name: Run tests
       run: dotnet test tests/VnumEnumeration.Tests/VnumEnumeration.Tests.csproj --configuration Release --no-build --verbosity normal
