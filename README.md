@@ -26,7 +26,7 @@ dotnet add package Skywithin.VnumEnumeration
 
 **VnumEnumeration** provides a base class (`Vnum`) for creating strongly-typed, enumeration-like constructs in C#. It enables you to define types that behave like enums but support additional metadata, such as display codes, and offer advanced lookup and parsing capabilities.
 
-This library supports .NET 9.0+ and leverages modern C# features for performance and type safety.
+This library supports .NET 10.0+ and leverages modern C# features for performance and type safety.
 
 ## Purpose
 
@@ -136,4 +136,4 @@ var order = JsonSerializer.Deserialize<Order>(json, options);
 
 ## Supported Frameworks
 
-- .NET 9.0+
+- .NET 10.0+

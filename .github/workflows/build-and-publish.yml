@@ -17,17 +17,17 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
         
     - name: Extract version from tag
       id: get_version
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
         
     - name: Restore dependencies
-      run: dotnet restore VnumEnumeration.sln
+      run: dotnet restore VnumEnumeration.slnx
       
     - name: Build solution
-      run: dotnet build VnumEnumeration.sln --configuration Release --no-restore
+      run: dotnet build VnumEnumeration.slnx --configuration Release --no-restore
       
     - name: Run tests
       run: dotnet test tests/VnumEnumeration.Tests/VnumEnumeration.Tests.csproj --configuration Release --no-build --verbosity normal
