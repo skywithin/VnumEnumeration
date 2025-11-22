@@ -2,8 +2,8 @@ name: Pre-release Publish to NuGet
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'rc-v*'  # Trigger on pre-release tags like rc-v1.0.0
 
 jobs:
   pre-release-publish:
@@ -18,24 +18,17 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    # Extract base version from csproj file
-    - name: Extract base version from csproj
-      id: get_base_version
-      run: |
-        VERSION=$(grep -oP '<Version>\K[^<]+' src/VnumEnumeration/VnumEnumeration.csproj 2>/dev/null || grep '<Version>' src/VnumEnumeration/VnumEnumeration.csproj | sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p')
-        # Strip any existing pre-release suffix to get clean base version
-        VERSION=$(echo "$VERSION" | sed 's/-.*$//')
-        echo "BASE_VERSION=$VERSION" >> $GITHUB_OUTPUT
-        echo "Base version: $VERSION"
-
-    # Determine final pre-release version
-    - name: Determine pre-release version
+    # Extract base version from tag and determine pre-release version
+    - name: Extract version from tag and set pre-release version
       id: set_version
       run: |
-        BASE_VERSION="${{ steps.get_base_version.outputs.BASE_VERSION }}"
+        # Extract version from tag (e.g., rc-v1.0.0 -> 1.0.0)
+        BASE_VERSION="${GITHUB_REF#refs/tags/rc-v}"
         REVISION="${{ github.run_number }}"
         FINAL_VERSION="${BASE_VERSION}-rc.${REVISION}"
+        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
         echo "VERSION=$FINAL_VERSION" >> $GITHUB_OUTPUT
+        echo "Base version: $BASE_VERSION"
         echo "Pre-release version: $FINAL_VERSION"
         
     - name: Restore dependencies
