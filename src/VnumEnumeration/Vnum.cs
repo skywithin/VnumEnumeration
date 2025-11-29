@@ -145,19 +145,6 @@ public abstract class Vnum : IEquatable<Vnum>
         return GetAllVnums(typeof(TVnum)).Cast<TVnum>().Where(predicate);
     }
 
-    /// <summary>
-    /// Retrieves all Vnum instances of a specified type.
-    /// </summary>
-    /// <param name="type">The type to retrieve Vnum instances for.</param>
-    /// <typeparam name="TVnum">The type of Vnum to retrieve.</typeparam>
-    /// <returns>An enumerable collection of all Vnum instances of the specified type.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="type"/> is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is not a valid Vnum type.</exception>
-    public static IEnumerable<TVnum> GetAll<TVnum>(Type type) where TVnum : Vnum
-    {
-        return GetAllVnums(type).Cast<TVnum>();
-    }
-
     private static object[] GetAllVnums(Type type)
     {
         //1. Validate the type parameter.
