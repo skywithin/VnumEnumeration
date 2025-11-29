@@ -90,7 +90,7 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// A thread-safe cache that stores arrays of <see cref="Vnum"/> instances for each derived type.
     /// This cache is used to improve performance by avoiding repeated reflection operations when retrieving
-    /// all instances of a specific type (e.g., via <see cref="GetAll(Type)"/>). 
+    /// all instances of a specific type (e.g., via <see cref="GetAllVnums(Type)"/>). 
     /// 
     /// Once populated, subsequent calls for the same type will retrieve the cached array instead of 
     /// invoking reflection, which can be computationally expensive. The cache uses a 
@@ -134,7 +134,7 @@ public abstract class Vnum : IEquatable<Vnum>
     /// </summary>
     public static IEnumerable<TVnum> GetAll<TVnum>() where TVnum : Vnum
     {
-        return GetAll(typeof(TVnum)).Cast<TVnum>();
+        return GetAllVnums(typeof(TVnum)).Cast<TVnum>();
     }
 
     /// <summary>
@@ -142,18 +142,26 @@ public abstract class Vnum : IEquatable<Vnum>
     /// </summary>
     public static IEnumerable<TVnum> GetAll<TVnum>(Func<TVnum, bool> predicate) where TVnum : Vnum
     {
-        return GetAll(typeof(TVnum)).Cast<TVnum>().Where(predicate);
+        return GetAllVnums(typeof(TVnum)).Cast<TVnum>().Where(predicate);
     }
 
-    private static object[] GetAll(Type type)
+    /// <summary>
+    /// Retrieves all Vnum instances of a specified type.
+    /// </summary>
+    /// <param name="type">The type to retrieve Vnum instances for.</param>
+    /// <typeparam name="TVnum">The type of Vnum to retrieve.</typeparam>
+    /// <returns>An enumerable collection of all Vnum instances of the specified type.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="type"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is not a valid Vnum type.</exception>
+    public static IEnumerable<TVnum> GetAll<TVnum>(Type type) where TVnum : Vnum
+    {
+        return GetAllVnums(type).Cast<TVnum>();
+    }
+
+    private static object[] GetAllVnums(Type type)
     {
         //1. Validate the type parameter.
-        if (type is null)
-        {
-            throw new ArgumentNullException(
-                paramName: nameof(type),
-                message: "Type cannot be null");
-        }
+        ArgumentNullException.ThrowIfNull(type);
 
         if (!typeof(Vnum).IsAssignableFrom(type))
         {
@@ -209,10 +217,7 @@ public abstract class Vnum : IEquatable<Vnum>
     /// </summary>
     public static TVnum FromCode<TVnum>(string code, bool ignoreCase = false) where TVnum : Vnum
     {
-        if (code is null)
-        {
-            throw new ArgumentNullException(nameof(code));
-        }
+        ArgumentNullException.ThrowIfNull(code);
 
         Func<TVnum, bool> predicate =
             (item) =>

@@ -351,6 +351,34 @@ public class BaseVnumTests
     }
 
     [Fact]
+    public void GetAll_With_Type_Parameter_Should_Return_All_Vnums()
+    {
+        // Act
+        var actual = Vnum.GetAll<TestVnum1>(typeof(TestVnum1)).ToList();
+
+        // Assert
+        var expected = new List<TestVnum1> { TestVnum1.OptionOne, TestVnum1.OptionTwo };
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void GetAll_With_Type_Parameter_And_Null_Type_Should_Throw_ArgumentNullException()
+    {
+        // Act & Assert
+        var ex = Assert.Throws<ArgumentNullException>(() => Vnum.GetAll<TestVnum1>((Type)null!));
+        Assert.Equal("type", ex.ParamName);
+    }
+
+    [Fact]
+    public void GetAll_With_Type_Parameter_And_Invalid_Type_Should_Throw_ArgumentException()
+    {
+        // Act & Assert
+        var ex = Assert.Throws<ArgumentException>(() => Vnum.GetAll<TestVnum1>(typeof(string)));
+        Assert.Equal("type", ex.ParamName);
+        Assert.Contains("is not a valid Vnum type", ex.Message);
+    }
+
+    [Fact]
     public void EqualityOperator_SameInstance_ShouldBeEqual()
     {
         var vnum1 = SampleVnum.One;
