@@ -377,9 +377,9 @@ public class BaseVnumTests
     [Fact]
     public void EqualityOperator_NullComparison_ShouldWork()
     {
-        SampleVnum? vnum1 = null;
-        SampleVnum? vnum2 = null;
-        SampleVnum? vnum3 = SampleVnum.One;
+        SampleVnum vnum1 = null;
+        SampleVnum vnum2 = null;
+        SampleVnum vnum3 = SampleVnum.One;
 
         Assert.True(vnum1 == vnum2);
         Assert.False(vnum1 == vnum3);
@@ -389,7 +389,7 @@ public class BaseVnumTests
     [Fact]
     public void EqualityOperator_OneNull_ShouldNotBeEqual()
     {
-        SampleVnum? vnum1 = null;
+        SampleVnum vnum1 = null;
         var vnum2 = SampleVnum.One;
 
         Assert.False(vnum1 == vnum2);
@@ -410,9 +410,9 @@ public class BaseVnumTests
     [Fact]
     public void InequalityOperator_NullComparison_ShouldWork()
     {
-        SampleVnum? vnum1 = null;
-        SampleVnum? vnum2 = null;
-        SampleVnum? vnum3 = SampleVnum.One;
+        SampleVnum vnum1 = null;
+        SampleVnum vnum2 = null;
+        SampleVnum vnum3 = SampleVnum.One;
 
         Assert.False(vnum1 != vnum2);
         Assert.True(vnum1 != vnum3);

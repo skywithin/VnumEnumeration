@@ -17,7 +17,14 @@ public abstract class Vnum<TEnum> : Vnum where TEnum : struct, Enum
     /// </summary>
     public TEnum Id => LongToEnum(Value);
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Vnum{TEnum}"/> class with the specified value and code.
+    /// </summary>
     protected Vnum(long value, string code) : base(value, code) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Vnum{TEnum}"/> class with the specified enum value and code.
+    /// </summary>
     protected Vnum(TEnum value, string code) : base(EnumToLong(value), code) { }
 
     /// <summary>
@@ -103,6 +110,9 @@ public abstract class Vnum : IEquatable<Vnum>
     /// </summary>
     public string Code { get; } = null!;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Vnum"/> class with the specified value and code.
+    /// </summary>
     protected Vnum(long value, string code)
     {
         if (string.IsNullOrWhiteSpace(code))
@@ -122,10 +132,17 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Retrieves all Vnum instances of a given type <typeparamref name="TVnum"/>.
     /// </summary>
-    public static IEnumerable<TVnum> GetAll<TVnum>(Func<TVnum, bool>? predicate = null) where TVnum : Vnum
+    public static IEnumerable<TVnum> GetAll<TVnum>() where TVnum : Vnum
     {
-        var all = GetAll(typeof(TVnum)).Cast<TVnum>();
-        return predicate is null ? all : all.Where(predicate);
+        return GetAll(typeof(TVnum)).Cast<TVnum>();
+    }
+
+    /// <summary>
+    /// Retrieves all Vnum instances of a given type <typeparamref name="TVnum"/> that satisfy the specified predicate.
+    /// </summary>
+    public static IEnumerable<TVnum> GetAll<TVnum>(Func<TVnum, bool> predicate) where TVnum : Vnum
+    {
+        return GetAll(typeof(TVnum)).Cast<TVnum>().Where(predicate);
     }
 
     private static object[] GetAll(Type type)
@@ -282,9 +299,15 @@ public abstract class Vnum : IEquatable<Vnum>
     /// </summary>
     public override int GetHashCode() => HashCode.Combine(GetType(), Value);
 
+    /// <summary>
+    /// Determines whether two Vnum instances are equal.
+    /// </summary>
     public static bool operator ==(Vnum? left, Vnum? right) =>
     left?.Equals(right) ?? right is null;
 
+    /// <summary>
+    /// Determines whether two Vnum instances are not equal.
+    /// </summary>
     public static bool operator !=(Vnum? left, Vnum? right) =>
         !(left == right);
 }
