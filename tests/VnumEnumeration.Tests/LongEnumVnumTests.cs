@@ -2,7 +2,7 @@ using Skywithin.VnumEnumeration;
 using Skywithin.VnumEnumeration.Serialization;
 using System.Text.Json;
 
-namespace VnumEnumeration.Tests;
+namespace Skywithin.VnumEnumeration.Tests;
 
 public enum LongEnum : long
 {

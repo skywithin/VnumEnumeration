@@ -159,7 +159,9 @@ Instances are discovered by reflection over **`public static` fields declared di
 - static properties (`public static OrderStatus X { get; } = ...`)
 - fields declared on a base class
 
-Discovery runs once per type; the results are cached for the lifetime of the process.
+Several fields that reference the same instance (e.g. `public static readonly OrderStatus Default = Pending;`) count as one instance.
+
+Discovery runs once per type; the results are cached for the lifetime of the process. Lookups by value and code are dictionary-based.
 
 ### Equality
 
@@ -172,9 +174,10 @@ Two Vnums are equal when they have the same runtime type and the same `Value`. `
 | `FromValue` / `FromCode` / `FromEnum` finds no match | `InvalidOperationException` |
 | `FromCode` called with `null` | `ArgumentNullException` |
 | Constructor called with a null, empty or whitespace code | `ArgumentException` |
+| `Vnum<TEnum>` constructed with a `long` value that doesn't fit the enum's underlying type | `ArgumentOutOfRangeException` |
 | JSON contains an unknown code or value | `JsonException` |
 
-The `Try*` methods return `false` instead of throwing in these cases.
+The `Try*` lookup methods return `false` instead of throwing when no match is found.
 
 ## Limitations
 
