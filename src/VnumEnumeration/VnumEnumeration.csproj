@@ -8,6 +8,7 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>Skywithin.VnumEnumeration</PackageId>
+    <!-- Local/dev default only. CI sets the real version from the git tag (v* / rc-v*) via -p:Version. -->
     <Version>10.0.0</Version>
     <Authors>Max Vagner</Authors>
     <Description>A strongly-typed smart enumeration base class with value-code pairs, reflection-based discovery, and JSON serialization support</Description>
