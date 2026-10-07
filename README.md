@@ -1,62 +1,43 @@
 # Vnum
 
 [![NuGet](https://img.shields.io/nuget/v/Skywithin.VnumEnumeration.svg)](https://www.nuget.org/packages/Skywithin.VnumEnumeration/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/skywithin/VnumEnumeration/blob/main/LICENSE)
 
-- Inspired by https://lostechies.com/jimmybogard/2008/08/12/enumeration-classes
+**VnumEnumeration** provides a base class (`Vnum`) for strongly-typed, enumeration-like types in C#. A Vnum behaves like an enum but each instance carries a numeric value *and* a string code, can hold extra metadata, and supports lookup, parsing and JSON serialization.
 
 ## Installation
-
-### Package Manager
-```powershell
-Install-Package Skywithin.VnumEnumeration
-```
 
 ### .NET CLI
 ```bash
 dotnet add package Skywithin.VnumEnumeration
 ```
 
-### PackageReference
-```xml
-<PackageReference Include="Skywithin.VnumEnumeration" Version="1.0.0" />
+### Package Manager
+```powershell
+Install-Package Skywithin.VnumEnumeration
 ```
 
-## Overview
+### PackageReference
+```xml
+<PackageReference Include="Skywithin.VnumEnumeration" Version="10.*" />
+```
 
-**VnumEnumeration** provides a base class (`Vnum`) for creating strongly-typed, enumeration-like constructs in C#. It enables you to define types that behave like enums but support additional metadata, such as display codes, and offer advanced lookup and parsing capabilities.
+## Features
 
-This library supports .NET 10.0+ and leverages modern C# features for performance and type safety.
+- **Value and code**: every instance has a `long` value and a non-empty string code.
+- **Reflection-based discovery**: all instances of a type are found automatically and cached (thread-safe) after the first lookup.
+- **Flexible lookup**: find instances by value, code (optionally case-insensitive) or enum, with throwing and `Try*` variants.
+- **Enum-backed types**: `Vnum<TEnum>` ties a Vnum to an enum of any underlying integral type (`byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`).
+- **JSON serialization**: a `System.Text.Json` converter factory that writes codes and reads codes or numeric values.
 
-## Purpose
+## Usage
 
-- **Strongly-Typed Enumerations**: Define custom types that encapsulate a long integer value and a string code, similar to enums but with extensibility.
-- **Reflection-Based Discovery**: Retrieve all instances of a Vnum type using reflection, with thread-safe caching for performance.
-- **Flexible Lookup**: Find Vnum instances by value, code, or enum, with both strict and try-based methods.
-- **Type Safety**: Generic support for enum-backed Vnum types via `Vnum<TEnum>`.
-- **Universal Enum Support**: Supports all enum underlying types (byte, sbyte, short, ushort, int, uint, long, ulong).
-- **JSON Serialization**: Built-in support for JSON serialization with `System.Text.Json`.
-
-## Key Features
-
-- **Value and Code**: Each Vnum instance has an integer value and a string code.
-- **Static Lookup Methods**:
-  - `GetAll<T>()`: Get all instances of a Vnum type.
-  - `FromValue<T>(long value)`: Get instance by value.
-  - `FromCode<T>(string code)`: Get instance by code.
-  - `FromEnum<TVnum, TEnum>(TEnum value)`: Get instance by enum value.
-  - `TryFromValue`, `TryFromCode`, `TryFromEnum`: Safe lookup variants.
-- **Equality and Hashing**: Instances are compared by type and value.
-- **JSON Serialization**: Automatic serialization to string codes and deserialization from codes or numeric values.
-
-## Usage Examples
-
-### Basic Vnum Definition
+### Defining a Vnum
 
 ```csharp
 public sealed class OrderStatus : Vnum
 {
-    private OrderStatus(int value, string code) : base(value, code) { }
+    private OrderStatus(long value, string code) : base(value, code) { }
 
     public static readonly OrderStatus Pending = new(1, "PENDING");
     public static readonly OrderStatus Processing = new(2, "PROCESSING");
@@ -65,7 +46,24 @@ public sealed class OrderStatus : Vnum
 }
 ```
 
-### Enum-Backed Vnum
+Instances can carry extra data by adding properties and constructor parameters:
+
+```csharp
+public sealed class Currency : Vnum
+{
+    public string Symbol { get; }
+
+    private Currency(long value, string code, string symbol) : base(value, code)
+    {
+        Symbol = symbol;
+    } 
+
+    public static readonly Currency Aud = new(1, "AUD", "$");
+    public static readonly Currency Eur = new(2, "EUR", "€");
+}
+```
+
+### Enum-backed Vnum
 
 ```csharp
 public enum StatusId
@@ -85,55 +83,124 @@ public sealed class OrderStatus : Vnum<StatusId>
     public static readonly OrderStatus Shipped = new(StatusId.Shipped, "SHIPPED");
     public static readonly OrderStatus Delivered = new(StatusId.Delivered, "DELIVERED");
 }
+
+StatusId id = OrderStatus.Shipped.Id;   // StatusId.Shipped
+long value = OrderStatus.Shipped.Value; // 3
 ```
 
-### Lookup Operations
+### Lookup
 
 ```csharp
-// Get all instances
-var allStatuses = Vnum.GetAll<OrderStatus>();
+// All instances, optionally filtered
+IEnumerable<OrderStatus> all = Vnum.GetAll<OrderStatus>();
+IEnumerable<OrderStatus> open = Vnum.GetAll<OrderStatus>(s => s.Value < 3);
 
-// Find by value
-var status = Vnum.FromValue<OrderStatus>(1);
+// Throwing lookups (InvalidOperationException if no match)
+var byValue = Vnum.FromValue<OrderStatus>(1);
+var byCode = Vnum.FromCode<OrderStatus>("PENDING");
+var byCodeIgnoreCase = Vnum.FromCode<OrderStatus>("pending", ignoreCase: true);
+var byEnum = Vnum.FromEnum<OrderStatus, StatusId>(StatusId.Pending);
 
-// Find by code
-var status = Vnum.FromCode<OrderStatus>("PENDING");
+// Safe lookups
+if (Vnum.TryFromValue<OrderStatus>(1, out var fromValue)) { /* ... */ }
+if (Vnum.TryFromCode<OrderStatus>("PENDING", out var fromCode)) { /* ... */ }
+if (Vnum.TryFromCode<OrderStatus>("pending", ignoreCase: true, out var fromCodeIgnoreCase)) { /* ... */ }
+if (Vnum.TryFromEnum<OrderStatus, StatusId>(StatusId.Pending, out var fromEnum)) { /* ... */ }
 
-// Safe lookup
-if (Vnum.TryFromValue<OrderStatus>(1, out var status))
-{
-    // Use status
-}
-
-// Enum conversion
-var status = Vnum.FromEnum<OrderStatus, StatusId>(StatusId.Pending);
+// ToString() returns the code
+Console.WriteLine(OrderStatus.Pending); // PENDING
 ```
 
-### JSON Serialization
+### JSON serialization
+
+Register `VnumJsonConverterFactory` once and it handles every Vnum type:
 
 ```csharp
-// Configure JSON serialization
+public record Order(int Id, OrderStatus Status);
+
 var options = new JsonSerializerOptions();
 options.Converters.Add(new VnumJsonConverterFactory());
 
-// Serialization
-var order = new { Id = 1, Status = OrderStatus.Pending };
-var json = JsonSerializer.Serialize(order, options);
-// Result: {"Id":1,"Status":"PENDING"}
+// Serializes to the code
+string json = JsonSerializer.Serialize(new Order(1, OrderStatus.Pending), options);
+// {"Id":1,"Status":"PENDING"}
 
-// Deserialization (supports both string codes and numeric values)
-var json = "{\"Id\":1,\"Status\":\"PENDING\"}";
-var order = JsonSerializer.Deserialize<Order>(json, options);
+// Deserializes from the code...
+Order? fromCode = JsonSerializer.Deserialize<Order>("""{"Id":1,"Status":"PENDING"}""", options);
 
-// Also works with numeric values for backward compatibility
-var json = "{\"Id\":1,\"Status\":1}";
-var order = JsonSerializer.Deserialize<Order>(json, options);
+// ...or from the numeric value (backward compatibility)
+Order? fromValue = JsonSerializer.Deserialize<Order>("""{"Id":1,"Status":1}""", options);
 ```
+
+In ASP.NET Core:
+
+```csharp
+// Minimal APIs
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.Converters.Add(new VnumJsonConverterFactory()));
+
+// MVC controllers
+builder.Services.AddControllers().AddJsonOptions(o =>
+    o.JsonSerializerOptions.Converters.Add(new VnumJsonConverterFactory()));
+```
+
+Reading notes:
+- Codes are matched **case-sensitively**.
+- `null` and an empty string both deserialize to `null`.
+- An unknown code or value throws `JsonException`; for unknown codes the message lists the valid ones.
+
+## Behavior
+
+### Instance discovery
+
+Instances are discovered by reflection over **`public static` fields declared directly on the Vnum type** (typically `public static readonly`). The following are ignored:
+
+- non-public static fields
+- static properties (`public static OrderStatus X { get; } = ...`)
+- fields declared on a base class
+
+Several fields that reference the same instance (e.g. `public static readonly OrderStatus Default = Pending;`) count as one instance.
+
+Discovery runs once per type; the results are cached for the lifetime of the process. Lookups by value and code are dictionary-based.
+
+### Equality
+
+Two Vnums are equal when they have the same runtime type and the same `Value`. `Code` is not part of equality or hashing. `==` and `!=` follow the same rules.
+
+### Errors
+
+| Situation | Exception |
+|---|---|
+| `FromValue` / `FromCode` / `FromEnum` finds no match | `InvalidOperationException` |
+| `FromCode` called with `null` | `ArgumentNullException` |
+| Constructor called with a null, empty or whitespace code | `ArgumentException` |
+| `Vnum<TEnum>` constructed with a `long` value that doesn't fit the enum's underlying type | `ArgumentOutOfRangeException` |
+| JSON contains an unknown code or value | `JsonException` |
+
+The `Try*` lookup methods return `false` instead of throwing when no match is found.
 
 ## Limitations
 
-- **ULong Overflow**: `ulong` enum values exceeding `long.MaxValue` will throw `OverflowException`
+- **No duplicate validation**: the library does not check that values or codes are unique. If two instances share a value or code, lookups return whichever is found first.
+- **`ulong` overflow**: `ulong` enum values greater than `long.MaxValue` throw `OverflowException`.
 
-## Supported Frameworks
+## Supported frameworks
 
 - .NET 10.0+
+
+## Building from source
+
+```bash
+dotnet build VnumEnumeration.slnx
+dotnet test tests/VnumEnumeration.Tests/VnumEnumeration.Tests.csproj
+```
+
+Releases are published to NuGet by GitHub Actions when a tag is pushed: `v1.2.3` publishes `1.2.3`, and `rc-v1.2.3` publishes the pre-release `1.2.3-rc.<run number>`.
+
+## Acknowledgements
+
+Inspired by Jimmy Bogard's [Enumeration classes](https://lostechies.com/jimmybogard/2008/08/12/enumeration-classes).
+
+## License
+
+[MIT](https://github.com/skywithin/VnumEnumeration/blob/main/LICENSE)

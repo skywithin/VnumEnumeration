@@ -59,3 +59,41 @@ public sealed class PrivateVnum : Vnum
 
     private PrivateVnum(int value, string code) : base(value, code) { }
 }
+
+public sealed class AliasedVnum : Vnum
+{
+    private AliasedVnum(int value, string code) : base(value, code) { }
+
+    public static readonly AliasedVnum One = new(1, "one");
+    public static readonly AliasedVnum Two = new(2, "two");
+
+    // Alias of an existing instance; must not be reported as a separate instance
+    public static readonly AliasedVnum Default = One;
+}
+
+public sealed class ReentrantVnum : Vnum
+{
+    private ReentrantVnum(int value, string code) : base(value, code) { }
+
+    public static readonly ReentrantVnum One = new(1, "one");
+
+    // Looks up an instance while the type's static initializer is still running,
+    // before Two has been assigned
+    public static readonly ReentrantVnum Default = FromValue<ReentrantVnum>(1);
+
+    public static readonly ReentrantVnum Two = new(2, "two");
+}
+
+public enum ByteId : byte
+{
+    One = 1
+}
+
+public sealed class ByteVnum : Vnum<ByteId>
+{
+    private ByteVnum(long value, string code) : base(value, code) { }
+
+    public static readonly ByteVnum One = new(1, "one");
+
+    public static ByteVnum Create(long value) => new(value, "created");
+}
