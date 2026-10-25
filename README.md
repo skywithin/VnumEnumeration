@@ -199,7 +199,7 @@ The `Try*` lookup methods return `false` instead of throwing when no match is fo
 
 ## Supported frameworks
 
-- .NET 10.0+
+- .NET 8.0 and later. The package contains a `net8.0` build and a `net10.0` build; .NET 9 apps use the `net8.0` build.
 
 ### Trimming and native AOT
 

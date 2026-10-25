@@ -130,6 +130,10 @@ public class VnumJsonConverterFactory : JsonConverterFactory
         Justification = "VnumJsonConverter<T> is only ever instantiated over reference types (T : Vnum), which share canonical generic code, so no new native code is required at runtime.")]
     [UnconditionalSuppressMessage("Trimming", "IL2071",
         Justification = "A Vnum type reaching the serializer is one the application references; its public static fields are assigned by its static constructor, which the trimmer keeps together with the type.")]
+    // The .NET 8 analyzer reports the same MakeGenericType call as IL2070 rather than IL2071. The parameter
+    // cannot carry the annotation instead, because it belongs to the overridden JsonConverterFactory method.
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Same as IL2071 above: the Vnum type's public static fields are kept by its static constructor.")]
     public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
         var converterType = typeof(VnumJsonConverter<>).MakeGenericType(typeToConvert);
