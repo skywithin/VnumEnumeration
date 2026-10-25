@@ -75,7 +75,6 @@ Open items with `breaking: true`: they change the public API or documented behav
 
 | ID | Title | Type | Area | Priority | Size |
 |----|-------|------|------|----------|------|
-| BL-0011 | Update the CLAUDE.md architecture notes to match the current discovery and lookup design | chore | docs | medium | S |
 | BL-0009 | NuGet packaging hygiene: SourceLink, deterministic CI builds, symbols package, release notes | chore | packaging | low | S |
 | BL-0010 | Fix the CS1723 XML doc warnings in the JSON converter and the CS8602 warnings in the tests | chore | serialization | low | S |
 
@@ -93,6 +92,7 @@ Older completed items stay in `backlog/items/`; this table shows the most recent
 |----|-------|------|------|----------|------|
 | BUG-0002 | Vnum cannot be used as a JSON dictionary key: the converter lacks the property-name overrides | bug | serialization | medium | S |
 | BUG-0001 | A null public static field permanently disables the lookup cache, so every lookup runs reflection | bug | core | high | M |
+| BL-0011 | Update the CLAUDE.md architecture notes to match the current discovery and lookup design | chore | docs | medium | S |
 | BL-0003 | Annotate reflection for trimming and AOT and declare IsAotCompatible | tech-debt | core | medium | M |
 | BL-0001 | Fail fast on duplicate values and codes when the lookup table is built | enhancement | core | high | M |
 
