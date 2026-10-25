@@ -144,10 +144,19 @@ builder.Services.AddControllers().AddJsonOptions(o =>
     o.JsonSerializerOptions.Converters.Add(new VnumJsonConverterFactory()));
 ```
 
+Vnums also work as dictionary keys, written and read as their codes:
+
+```csharp
+var counts = new Dictionary<OrderStatus, int> { [OrderStatus.Pending] = 3 };
+string json = JsonSerializer.Serialize(counts, options);
+// {"PENDING":3}
+```
+
 Reading notes:
 - Codes are matched **case-sensitively**.
 - `null` and an empty string both deserialize to `null`.
 - An unknown code or value throws `JsonException`; for unknown codes the message lists the valid ones.
+- Dictionary keys are matched by code only; a numeric key such as `"1"` is an unknown code.
 
 ## Behavior
 

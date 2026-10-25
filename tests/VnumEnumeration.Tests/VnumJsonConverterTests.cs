@@ -176,6 +176,73 @@ public class VnumJsonConverterTests
     }
 
     [Fact]
+    public void Serialize_Dictionary_With_Vnum_Keys_Should_Write_Codes()
+    {
+        // Arrange
+        var dictionary = new Dictionary<TestVnum1, int>
+        {
+            [TestVnum1.OptionOne] = 1,
+            [TestVnum1.OptionTwo] = 2,
+        };
+
+        // Act
+        var json = JsonSerializer.Serialize(dictionary, _options);
+
+        // Assert
+        Assert.Equal("{\"OptionOne\":1,\"OptionTwo\":2}", json);
+    }
+
+    [Fact]
+    public void Deserialize_Dictionary_With_Vnum_Keys_Should_Resolve_Codes()
+    {
+        // Arrange
+        var json = "{\"OptionOne\":1,\"OptionTwo\":2}";
+
+        // Act
+        var result = JsonSerializer.Deserialize<Dictionary<TestVnum1, int>>(json, _options);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        Assert.Equal(1, result[TestVnum1.OptionOne]);
+        Assert.Equal(2, result[TestVnum1.OptionTwo]);
+    }
+
+    [Theory]
+    [InlineData("{\"Unknown\":1}")]
+    [InlineData("{\"optionone\":1}")] // Case sensitive
+    [InlineData("{\"1\":1}")]         // Numeric values are not accepted as keys
+    public void Deserialize_Dictionary_With_Unknown_Vnum_Key_Should_Throw_JsonException(string json)
+    {
+        // Act & Assert
+        var ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Dictionary<TestVnum1, int>>(json, _options));
+        Assert.Contains("is not a valid code for TestVnum1", ex.Message);
+        Assert.Contains("Valid codes:", ex.Message);
+    }
+
+    [Fact]
+    public void Complex_Object_With_Vnum_Keyed_Dictionary_Should_Round_Trip()
+    {
+        // Arrange
+        var obj = new TestObjectWithDictionary
+        {
+            Name = "Test",
+            Counts = { [TestVnum1.OptionTwo] = 5 },
+        };
+
+        // Act
+        var json = JsonSerializer.Serialize(obj, _options);
+        var result = JsonSerializer.Deserialize<TestObjectWithDictionary>(json, _options);
+
+        // Assert
+        Assert.Equal("{\"Name\":\"Test\",\"Counts\":{\"OptionTwo\":5}}", json);
+        Assert.NotNull(result);
+        var pair = Assert.Single(result.Counts);
+        Assert.Equal(TestVnum1.OptionTwo, pair.Key);
+        Assert.Equal(5, pair.Value);
+    }
+
+    [Fact]
     public void VnumJsonConverterFactory_Should_Handle_Vnum_Types()
     {
         // Arrange
@@ -322,5 +389,11 @@ public class VnumJsonConverterTests
     {
         public string Name { get; set; } = null!;
         public TestVnum1 Status { get; set; } = null!;
+    }
+
+    private class TestObjectWithDictionary
+    {
+        public string Name { get; set; } = null!;
+        public Dictionary<TestVnum1, int> Counts { get; set; } = new();
     }
 }
