@@ -43,3 +43,17 @@ Versioning is driven by git tags, not the `<Version>` in the csproj (CI override
 - `rc-v1.2.3` tag → `.github/workflows/pre-release-publish.yml` publishes `1.2.3-rc.<run_number>`.
 
 `README.md` at the repo root is packed into the NuGet package as its readme, so keep its API examples in sync when the public surface changes.
+
+## Backlog
+
+Issues and planned work live in `backlog/`: one markdown file per item in `backlog/items/` with YAML frontmatter, and `backlog/BACKLOG.md` as the generated index (`dotnet run tools/backlog-sync.cs`). IDs are `BL-XXXX` for non-bug items and `BUG-XXXX` for bugs. The item template with the allowed values is at the top of `backlog/BACKLOG.md`; `tools/backlog-lint.cs` enforces `id`, `title`, `type`, `area`, `priority`, `size` and `status`.
+
+- Change `status` with `dotnet run tools/backlog-set-field.cs <ID> status <value>`; it sets `completed` and rebuilds the index. Never hand-edit `status`, `completed` or the generated part of `BACKLOG.md`.
+- `breaking: true` marks an item that changes the public API or documented behaviour. The index groups them under "Next major version"; they should ship together in one major version.
+- `/backlog-add-bug` and `/backlog-add-item` file items; `/backlog-fix-bug <ID>` and `/backlog-process-item <ID>` work them; `/backlog-status` gives an overview. The shared gates (test baseline, build + test, marking done, IDs, branch and commit rules, public-surface rule) are in `.claude/prompts/backlog-gates.md`.
+- Commits that resolve an item use Conventional Commits scoped by area with the ID at the end: `fix(core): ... (BUG-0001)`, `feat(serialization): ... (BL-0007)`, `chore(packaging): ... (BL-0009)`.
+- Do not cite backlog IDs in code comments, XML docs or test names; the reference rots once the item closes. IDs belong in `backlog/`, commit messages and `TODO` markers.
+
+## Tools
+
+Single-file C# apps in `tools/`, run with `dotnet run tools/<name>.cs` (pass tool flags after `--`). See `tools/README.md` for the list.
