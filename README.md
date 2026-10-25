@@ -180,6 +180,10 @@ Values and codes must be unique within a type, and codes must also be unique ign
 
 Two Vnums are equal when they have the same runtime type and the same `Value`. `Code` is not part of equality or hashing. `==` and `!=` follow the same rules.
 
+### Ordering
+
+Vnums implement `IComparable<Vnum>` and order by `Value`, so `OrderBy(s => s)`, `SortedSet<T>` and `Array.Sort` work directly. Every instance sorts after `null`. Comparing instances of two different Vnum types throws `ArgumentException`, because ordering, like equality, is scoped to one type. There are no `<` or `>` operators; use `CompareTo` or compare `Value`.
+
 ### Errors
 
 | Situation | Exception |
@@ -187,6 +191,7 @@ Two Vnums are equal when they have the same runtime type and the same `Value`. `
 | `FromValue` / `FromCode` / `FromEnum` finds no match | `InvalidOperationException` |
 | Two instances of a type share a value, share a code, or have codes that differ only by case (thrown by the first lookup on that type) | `InvalidOperationException` |
 | `FromCode` called with `null` | `ArgumentNullException` |
+| `CompareTo` called with an instance of a different Vnum type | `ArgumentException` |
 | Constructor called with a null, empty or whitespace code | `ArgumentException` |
 | `Vnum<TEnum>` constructed with a `long` value that doesn't fit the enum's underlying type, or that is not a declared member of the enum (not checked for `[Flags]` enums) | `ArgumentOutOfRangeException` |
 | JSON contains an unknown code or value | `JsonException` |

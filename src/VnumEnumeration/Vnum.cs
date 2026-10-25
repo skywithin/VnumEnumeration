@@ -117,7 +117,7 @@ public abstract class Vnum<TEnum> : Vnum where TEnum : struct, Enum
 /// Provides a base class for creating enumeration-like constructs
 /// with strongly-typed values and display codes.
 /// </summary>
-public abstract class Vnum : IEquatable<Vnum>
+public abstract class Vnum : IEquatable<Vnum>, IComparable<Vnum>, IComparable
 {
     /// <summary>
     /// Gets the numeric value of the Vnum item.
@@ -377,4 +377,43 @@ public abstract class Vnum : IEquatable<Vnum>
     /// </summary>
     public static bool operator !=(Vnum? left, Vnum? right) =>
         !(left == right);
+
+    /// <summary>
+    /// Compares this instance with another Vnum of the same runtime type by <see cref="Value"/>.
+    /// </summary>
+    /// <returns>
+    /// A negative number, zero or a positive number when this instance's <see cref="Value"/> is less than, equal to
+    /// or greater than that of <paramref name="other"/>. Every instance is greater than <see langword="null"/>.
+    /// </returns>
+    /// <exception cref="ArgumentException"><paramref name="other"/> has a different runtime type.</exception>
+    public int CompareTo(Vnum? other)
+    {
+        if (other is null)
+        {
+            return 1;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return 0;
+        }
+
+        // Ordering is scoped to one runtime type, like equality.
+        if (GetType() != other.GetType())
+        {
+            throw new ArgumentException(
+                $"Cannot compare {GetType().Name} with {other.GetType().Name}: Vnums are only ordered within one type.",
+                nameof(other));
+        }
+
+        return Value.CompareTo(other.Value);
+    }
+
+    /// <inheritdoc/>
+    int IComparable.CompareTo(object? obj) => obj switch
+    {
+        null => 1,
+        Vnum other => CompareTo(other),
+        _ => throw new ArgumentException($"Object must be a Vnum, not {obj.GetType().Name}.", nameof(obj)),
+    };
 }
