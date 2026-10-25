@@ -7,10 +7,12 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <!-- Trimming / native AOT: enables the IL analyzers and marks the package as AOT-compatible.
-         The IL warnings are errors so a new unannotated reflection call cannot slip in unnoticed. -->
+    <!-- Trimming / native AOT: enables the IL analyzers and marks the package as AOT-compatible. -->
     <IsAotCompatible>true</IsAotCompatible>
-    <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2046;IL2055;IL2057;IL2060;IL2062;IL2067;IL2070;IL2071;IL2072;IL2075;IL2087;IL2090;IL2091;IL2092;IL2095;IL3050;IL3051;IL3052</WarningsAsErrors>
+
+    <!-- The library builds warning-free on every target; keep it that way. This also covers the IL trimming/AOT
+         analyzer warnings, so a new unannotated reflection call fails the build. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <!-- NuGet Package Metadata -->
     <PackageId>Skywithin.VnumEnumeration</PackageId>

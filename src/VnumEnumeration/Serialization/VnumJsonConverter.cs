@@ -11,11 +11,11 @@ namespace Skywithin.VnumEnumeration.Serialization;
 public class VnumJsonConverter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum> : JsonConverter<TVnum> where TVnum : Vnum
 {
     /// <summary>
-    /// Reads and converts a JSON value to an instance of the specified <see cref="TVnum"/> type.
+    /// Reads and converts a JSON value to an instance of the specified <typeparamref name="TVnum"/> type.
     /// </summary>
-    /// <remarks>This method supports deserialization of <see cref="TVnum"/> instances from either a string
-    /// code or a numeric value. String codes are case-sensitive and must match a valid <see cref="TVnum"/> instance.
-    /// Numeric values are supported for backward compatibility and must correspond to a valid <see cref="TVnum"/>
+    /// <remarks>This method supports deserialization of <typeparamref name="TVnum"/> instances from either a string
+    /// code or a numeric value. String codes are case-sensitive and must match a valid <typeparamref name="TVnum"/> instance.
+    /// Numeric values are supported for backward compatibility and must correspond to a valid <typeparamref name="TVnum"/>
     /// instance.</remarks>
     public override TVnum? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -59,7 +59,7 @@ public class VnumJsonConverter<[DynamicallyAccessedMembers(DynamicallyAccessedMe
     }
 
     /// <summary>
-    /// Writes the specified <see cref="TVnum"/> code as a JSON string or null.
+    /// Writes the specified <typeparamref name="TVnum"/> code as a JSON string or null.
     /// </summary>
     public override void Write(Utf8JsonWriter writer, TVnum vnum, JsonSerializerOptions options)
     {

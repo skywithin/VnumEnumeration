@@ -22,7 +22,7 @@ dotnet test tests/VnumEnumeration.Tests -f net8.0
 dotnet pack src/VnumEnumeration/VnumEnumeration.csproj -c Release -p:Version=x.y.z
 ```
 
-The solution file is the new XML `.slnx` format (requires a recent .NET SDK). There is no separate lint step; the library builds with `Nullable` enabled and `GenerateDocumentationFile`, so public members need XML doc comments to avoid CS1591 warnings. The csproj sets `IsAotCompatible` and lists the IL2xxx/IL3xxx trim/AOT analyzer codes in `WarningsAsErrors`, so unannotated reflection fails the build.
+The solution file is the new XML `.slnx` format (requires a recent .NET SDK). There is no separate lint step; the library builds with `Nullable` enabled and `GenerateDocumentationFile`, so public members need XML doc comments (CS1591). The library csproj sets `IsAotCompatible` and `TreatWarningsAsErrors`, so any warning in the library fails the build, including the IL2xxx/IL3xxx trim/AOT analyzer warnings for unannotated reflection. The test project does not treat warnings as errors, but keep it warning-free too.
 
 ## Architecture
 
