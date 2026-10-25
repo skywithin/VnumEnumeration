@@ -84,6 +84,17 @@ public sealed class ReentrantVnum : Vnum
     public static readonly ReentrantVnum Two = new(2, "two");
 }
 
+public sealed class NullFieldVnum : Vnum
+{
+    private NullFieldVnum(int value, string code) : base(value, code) { }
+
+    public static readonly NullFieldVnum One = new(1, "one");
+    public static readonly NullFieldVnum Two = new(2, "two");
+
+    // A genuinely null field (sentinel); must not stop the lookup table from being cached
+    public static readonly NullFieldVnum? None = null;
+}
+
 public enum ByteId : byte
 {
     One = 1

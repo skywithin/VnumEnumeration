@@ -29,6 +29,20 @@ public class VnumDiscoveryTests
     }
 
     [Fact]
+    public void Null_Static_Field_Should_Be_Skipped_And_Not_Prevent_Caching()
+    {
+        // Act
+        var first = Vnum.GetAll<NullFieldVnum>();
+        var second = Vnum.GetAll<NullFieldVnum>();
+
+        // Assert
+        Assert.Equal([NullFieldVnum.One, NullFieldVnum.Two], first);
+        Assert.Same(first, second); // the cached table is returned, not a rebuilt one
+        Assert.True(Vnum.TryFromValue<NullFieldVnum>(2, out var two));
+        Assert.Same(NullFieldVnum.Two, two);
+    }
+
+    [Fact]
     public void GetAll_Result_Should_Be_Read_Only()
     {
         // Act

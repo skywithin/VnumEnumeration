@@ -65,7 +65,6 @@ Open items with `breaking: true`: they change the public API or documented behav
 
 | ID | Title | Type | Area | Priority | Size |
 |----|-------|------|------|----------|------|
-| BUG-0001 | A null public static field permanently disables the lookup cache, so every lookup runs reflection | bug | core | high | M |
 | BUG-0002 | Vnum cannot be used as a JSON dictionary key: the converter lacks the property-name overrides | bug | serialization | medium | S |
 
 ### Features & Enhancements
@@ -99,5 +98,7 @@ Open items with `breaking: true`: they change the public API or documented behav
 
 Older completed items stay in `backlog/items/`; this table shows the most recent completions.
 
-Nothing completed yet.
+| ID | Title | Type | Area | Priority | Size |
+|----|-------|------|------|----------|------|
+| BUG-0001 | A null public static field permanently disables the lookup cache, so every lookup runs reflection | bug | core | high | M |
 

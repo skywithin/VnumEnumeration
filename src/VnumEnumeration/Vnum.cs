@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -244,16 +245,37 @@ public abstract class Vnum : IEquatable<Vnum>
 
             var lookup = new Lookup<TVnum>(values.OfType<TVnum>().Distinct<TVnum>(ReferenceEqualityComparer.Instance));
 
-            // A null field means we were called while TVnum's static initializer is still running
-            // (e.g. from one of its own field initializers). Return the partial result for this call,
-            // but don't cache it, so later calls see the fully initialized set.
-            if (values.All(v => v is not null))
+            // A null field is either a genuine null (e.g. a "None" sentinel), which is simply skipped,
+            // or a field whose initializer has not run yet because we were called from TVnum's own
+            // static initializer (e.g. from one of its field initializers). Only the second case must
+            // not be cached: return the partial result for this call so later calls see the full set.
+            if (values.All(v => v is not null) || !IsStaticInitializerRunning())
             {
                 // Concurrent builders produce equivalent lookups, so whichever write wins is fine.
                 Volatile.Write(ref _lookup, lookup);
             }
 
             return lookup;
+        }
+
+        /// <summary>
+        /// Checks whether TVnum's static initializer is on the current call stack. Only consulted when a
+        /// null field was seen, so the normal path never walks the stack. When a frame cannot be
+        /// resolved (possible under native AOT) the answer is "unknown" and we err on the side of not caching.
+        /// </summary>
+        private static bool IsStaticInitializerRunning()
+        {
+            foreach (var frame in new StackTrace(fNeedFileInfo: false).GetFrames())
+            {
+                var method = frame.GetMethod();
+                if (method is null)
+                    return true;
+
+                if (method.Name == ".cctor" && method.DeclaringType == typeof(TVnum))
+                    return true;
+            }
+
+            return false;
         }
     }
 

@@ -159,9 +159,9 @@ Instances are discovered by reflection over **`public static` fields declared di
 - static properties (`public static OrderStatus X { get; } = ...`)
 - fields declared on a base class
 
-Several fields that reference the same instance (e.g. `public static readonly OrderStatus Default = Pending;`) count as one instance.
+Several fields that reference the same instance (e.g. `public static readonly OrderStatus Default = Pending;`) count as one instance. A field whose value is `null` (e.g. a `None` sentinel) is skipped.
 
-Discovery runs once per type; the results are cached for the lifetime of the process. Lookups by value and code are dictionary-based.
+Discovery runs once per type; the results are cached for the lifetime of the process. Lookups by value and code are dictionary-based. A lookup made from inside the type's own static initializer (e.g. `public static readonly OrderStatus Default = Vnum.FromValue<OrderStatus>(1);`) sees only the fields assigned so far; the cache is populated once the initializer has finished.
 
 ### Equality
 
