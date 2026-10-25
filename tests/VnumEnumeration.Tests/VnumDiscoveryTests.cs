@@ -100,8 +100,31 @@ public class VnumDiscoveryTests
         // Act
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => ByteVnum.Create(value));
 
+        // Assert: the range check runs before the declared-member check
+        Assert.Equal("value", ex.ParamName);
+        Assert.StartsWith("Value is out of range for the underlying type of enum ByteId.", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_With_Undefined_Enum_Member_Should_Throw()
+    {
+        // Act: 7 fits in a byte but is not a member of ByteId
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => ByteVnum.Create(7));
+
         // Assert
         Assert.Equal("value", ex.ParamName);
+        Assert.Equal(7L, ex.ActualValue);
+        Assert.StartsWith("Value 7 is not a defined member of enum ByteId.", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_With_Combined_Flags_Value_Should_Not_Throw()
+    {
+        // Act: Read | Write is not a declared member, but [Flags] enums skip the check
+        var vnum = FlagsVnum.Create(3);
+
+        // Assert
+        Assert.Equal(PermissionId.Read | PermissionId.Write, vnum.Id);
     }
 
     [Fact]

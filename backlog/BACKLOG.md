@@ -53,7 +53,6 @@ Open items with `breaking: true`: they change the public API or documented behav
 
 | ID | Title | Type | Area | Priority | Size |
 |----|-------|------|------|----------|------|
-| BL-0002 | Reject values that are not declared enum members in the Vnum<TEnum> long constructor | enhancement | core | medium | S |
 | BL-0004 | Return IReadOnlyList<TVnum> from GetAll<TVnum>() | enhancement | core | low | S |
 | BL-0006 | JSON: treat an empty string as an invalid code instead of null, and remove the dead null branches | enhancement | serialization | low | S |
 | BL-0012 | Evaluate a self-referencing generic API shape (OrderStatus.FromCode) against the current Vnum.FromCode<OrderStatus> entry points | investigation | core | low | M |
@@ -64,7 +63,6 @@ Open items with `breaking: true`: they change the public API or documented behav
 
 | ID | Title | Type | Area | Priority | Size |
 |----|-------|------|------|----------|------|
-| BL-0002 | Reject values that are not declared enum members in the Vnum<TEnum> long constructor | enhancement | core | medium | S |
 | BL-0008 | Multi-target net8.0 and net10.0 so LTS consumers can install the package | enhancement | packaging | medium | S |
 | BL-0004 | Return IReadOnlyList<TVnum> from GetAll<TVnum>() | enhancement | core | low | S |
 | BL-0005 | Implement IComparable<Vnum> so instances sort by Value | enhancement | core | low | S |
@@ -94,5 +92,6 @@ Older completed items stay in `backlog/items/`; this table shows the most recent
 | BUG-0001 | A null public static field permanently disables the lookup cache, so every lookup runs reflection | bug | core | high | M |
 | BL-0011 | Update the CLAUDE.md architecture notes to match the current discovery and lookup design | chore | docs | medium | S |
 | BL-0003 | Annotate reflection for trimming and AOT and declare IsAotCompatible | tech-debt | core | medium | M |
+| BL-0002 | Reject values that are not declared enum members in the Vnum<TEnum> long constructor | enhancement | core | medium | S |
 | BL-0001 | Fail fast on duplicate values and codes when the lookup table is built | enhancement | core | high | M |
 

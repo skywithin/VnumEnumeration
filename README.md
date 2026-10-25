@@ -88,6 +88,8 @@ StatusId id = OrderStatus.Shipped.Id;   // StatusId.Shipped
 long value = OrderStatus.Shipped.Value; // 3
 ```
 
+A `Vnum<TEnum>` can also be constructed from a `long` value. That value must be a declared member of the enum: `new(7, "X")` throws `ArgumentOutOfRangeException` when the enum has no member equal to 7. `[Flags]` enums are exempt, because combined values such as `Read | Write` are not declared members.
+
 ### Lookup
 
 ```csharp
@@ -186,7 +188,7 @@ Two Vnums are equal when they have the same runtime type and the same `Value`. `
 | Two instances of a type share a value, share a code, or have codes that differ only by case (thrown by the first lookup on that type) | `InvalidOperationException` |
 | `FromCode` called with `null` | `ArgumentNullException` |
 | Constructor called with a null, empty or whitespace code | `ArgumentException` |
-| `Vnum<TEnum>` constructed with a `long` value that doesn't fit the enum's underlying type | `ArgumentOutOfRangeException` |
+| `Vnum<TEnum>` constructed with a `long` value that doesn't fit the enum's underlying type, or that is not a declared member of the enum (not checked for `[Flags]` enums) | `ArgumentOutOfRangeException` |
 | JSON contains an unknown code or value | `JsonException` |
 
 The `Try*` lookup methods return `false` instead of throwing when no match is found.

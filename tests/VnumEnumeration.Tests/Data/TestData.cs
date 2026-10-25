@@ -134,3 +134,20 @@ public sealed class ByteVnum : Vnum<ByteId>
 
     public static ByteVnum Create(long value) => new(value, "created");
 }
+
+[Flags]
+public enum PermissionId : byte
+{
+    Read = 1,
+    Write = 2
+}
+
+public sealed class FlagsVnum : Vnum<PermissionId>
+{
+    private FlagsVnum(long value, string code) : base(value, code) { }
+
+    public static readonly FlagsVnum Read = new(1, "read");
+    public static readonly FlagsVnum Write = new(2, "write");
+
+    public static FlagsVnum Create(long value) => new(value, "created");
+}

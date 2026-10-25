@@ -17,6 +17,9 @@ public abstract class Vnum<TEnum> : Vnum where TEnum : struct, Enum
 {
     private static readonly TypeCode UnderlyingTypeCode = Type.GetTypeCode(Enum.GetUnderlyingType(typeof(TEnum)));
 
+    // Combined [Flags] values are legitimate but are not "defined" members, so the defined-member check skips them.
+    private static readonly bool IsFlagsEnum = typeof(TEnum).IsDefined(typeof(FlagsAttribute), inherit: false);
+
     /// <summary>
     /// Gets the enumeration value of the Vnum item.
     /// </summary>
@@ -26,11 +29,21 @@ public abstract class Vnum<TEnum> : Vnum where TEnum : struct, Enum
     /// Initializes a new instance of the <see cref="Vnum{TEnum}"/> class with the specified value and code.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// <paramref name="value"/> does not fit in the underlying type of <typeparamref name="TEnum"/>.
+    /// <paramref name="value"/> does not fit in the underlying type of <typeparamref name="TEnum"/>, or is not a
+    /// declared member of <typeparamref name="TEnum"/>. The declared-member check is skipped for <c>[Flags]</c> enums,
+    /// whose combined values are not declared members.
     /// </exception>
     protected Vnum(long value, string code) : base(value, code)
     {
         Id = LongToEnum(value);
+
+        if (!IsFlagsEnum && !Enum.IsDefined(Id))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(value),
+                value,
+                $"Value {value} is not a defined member of enum {typeof(TEnum).Name}.");
+        }
     }
 
     /// <summary>
