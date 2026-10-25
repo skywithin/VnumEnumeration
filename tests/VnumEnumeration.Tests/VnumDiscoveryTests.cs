@@ -43,6 +43,46 @@ public class VnumDiscoveryTests
     }
 
     [Fact]
+    public void Duplicate_Value_Should_Throw_On_First_Lookup()
+    {
+        // Act
+        var ex = Assert.Throws<InvalidOperationException>(() => Vnum.GetAll<DuplicateValueVnum>());
+
+        // Assert
+        Assert.Equal("Duplicate value 1 in DuplicateValueVnum: 'a' and 'b'", ex.Message);
+    }
+
+    [Fact]
+    public void Duplicate_Code_Should_Throw_On_First_Lookup()
+    {
+        // Act
+        var ex = Assert.Throws<InvalidOperationException>(() => Vnum.TryFromValue<DuplicateCodeVnum>(1, out _));
+
+        // Assert
+        Assert.Equal("Duplicate code 'same' in DuplicateCodeVnum", ex.Message);
+    }
+
+    [Fact]
+    public void Codes_Differing_Only_By_Case_Should_Throw_On_First_Lookup()
+    {
+        // Act
+        var ex = Assert.Throws<InvalidOperationException>(() => Vnum.FromCode<CaseClashCodeVnum>("abc"));
+
+        // Assert
+        Assert.Equal(
+            "Codes 'abc' and 'ABC' in CaseClashCodeVnum differ only by case; codes must be unique ignoring case",
+            ex.Message);
+    }
+
+    [Fact]
+    public void Broken_Type_Should_Throw_On_Every_Lookup_Not_Only_The_First()
+    {
+        // Act & Assert: a failed build is not cached, so the second call fails the same way
+        Assert.Throws<InvalidOperationException>(() => Vnum.GetAll<DuplicateValueVnum>());
+        Assert.Throws<InvalidOperationException>(() => Vnum.FromValue<DuplicateValueVnum>(1));
+    }
+
+    [Fact]
     public void GetAll_Result_Should_Be_Read_Only()
     {
         // Act

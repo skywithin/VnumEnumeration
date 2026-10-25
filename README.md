@@ -25,7 +25,7 @@ Install-Package Skywithin.VnumEnumeration
 ## Features
 
 - **Value and code**: every instance has a `long` value and a non-empty string code.
-- **Reflection-based discovery**: all instances of a type are found automatically and cached (thread-safe) after the first lookup.
+- **Reflection-based discovery**: all instances of a type are found automatically, validated (unique values and codes) and cached (thread-safe) after the first lookup.
 - **Flexible lookup**: find instances by value, code (optionally case-insensitive) or enum, with throwing and `Try*` variants.
 - **Enum-backed types**: `Vnum<TEnum>` ties a Vnum to an enum of any underlying integral type (`byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`).
 - **JSON serialization**: a `System.Text.Json` converter factory that writes codes and reads codes or numeric values.
@@ -170,7 +170,9 @@ Instances are discovered by reflection over **`public static` fields declared di
 
 Several fields that reference the same instance (e.g. `public static readonly OrderStatus Default = Pending;`) count as one instance. A field whose value is `null` (e.g. a `None` sentinel) is skipped.
 
-Discovery runs once per type; the results are cached for the lifetime of the process. Lookups by value and code are dictionary-based. A lookup made from inside the type's own static initializer (e.g. `public static readonly OrderStatus Default = Vnum.FromValue<OrderStatus>(1);`) sees only the fields assigned so far; the cache is populated once the initializer has finished.
+Discovery runs once per type; the results are cached for the lifetime of the process. Lookups by value and code are dictionary-based.
+
+Values and codes must be unique within a type, and codes must also be unique ignoring case (so that `ignoreCase: true` lookups are unambiguous). A violation throws `InvalidOperationException` from the first lookup on that type, naming the type and the clashing members. Calling `Vnum.GetAll<T>()` in a unit test is enough to assert a type is well-formed. A lookup made from inside the type's own static initializer (e.g. `public static readonly OrderStatus Default = Vnum.FromValue<OrderStatus>(1);`) sees only the fields assigned so far; the cache is populated once the initializer has finished.
 
 ### Equality
 
@@ -181,6 +183,7 @@ Two Vnums are equal when they have the same runtime type and the same `Value`. `
 | Situation | Exception |
 |---|---|
 | `FromValue` / `FromCode` / `FromEnum` finds no match | `InvalidOperationException` |
+| Two instances of a type share a value, share a code, or have codes that differ only by case (thrown by the first lookup on that type) | `InvalidOperationException` |
 | `FromCode` called with `null` | `ArgumentNullException` |
 | Constructor called with a null, empty or whitespace code | `ArgumentException` |
 | `Vnum<TEnum>` constructed with a `long` value that doesn't fit the enum's underlying type | `ArgumentOutOfRangeException` |
@@ -190,7 +193,6 @@ The `Try*` lookup methods return `false` instead of throwing when no match is fo
 
 ## Limitations
 
-- **No duplicate validation**: the library does not check that values or codes are unique. If two instances share a value or code, lookups return whichever is found first.
 - **`ulong` overflow**: `ulong` enum values greater than `long.MaxValue` throw `OverflowException`.
 
 ## Supported frameworks

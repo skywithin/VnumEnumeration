@@ -95,6 +95,32 @@ public sealed class NullFieldVnum : Vnum
     public static readonly NullFieldVnum? None = null;
 }
 
+// The three types below are deliberately broken: the first lookup on each must throw.
+
+public sealed class DuplicateValueVnum : Vnum
+{
+    private DuplicateValueVnum(int value, string code) : base(value, code) { }
+
+    public static readonly DuplicateValueVnum A = new(1, "a");
+    public static readonly DuplicateValueVnum B = new(1, "b");
+}
+
+public sealed class DuplicateCodeVnum : Vnum
+{
+    private DuplicateCodeVnum(int value, string code) : base(value, code) { }
+
+    public static readonly DuplicateCodeVnum A = new(1, "same");
+    public static readonly DuplicateCodeVnum B = new(2, "same");
+}
+
+public sealed class CaseClashCodeVnum : Vnum
+{
+    private CaseClashCodeVnum(int value, string code) : base(value, code) { }
+
+    public static readonly CaseClashCodeVnum Lower = new(1, "abc");
+    public static readonly CaseClashCodeVnum Upper = new(2, "ABC");
+}
+
 public enum ByteId : byte
 {
     One = 1

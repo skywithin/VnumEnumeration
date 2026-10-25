@@ -290,13 +290,28 @@ public abstract class Vnum : IEquatable<Vnum>
         {
             Items = items.ToList().AsReadOnly();
 
-            // TryAdd keeps the first instance when values or codes are duplicated,
-            // matching the original first-match lookup behavior.
+            // A duplicate value or code is an authoring mistake; fail on the first lookup rather than
+            // silently answering with whichever instance was declared first.
             foreach (var item in Items)
             {
-                ByValue.TryAdd(item.Value, item);
-                ByCode.TryAdd(item.Code, item);
-                ByCodeIgnoreCase.TryAdd(item.Code, item);
+                if (!ByValue.TryAdd(item.Value, item))
+                {
+                    throw new InvalidOperationException(
+                        $"Duplicate value {item.Value} in {typeof(TVnum).Name}: '{ByValue[item.Value].Code}' and '{item.Code}'");
+                }
+
+                if (!ByCode.TryAdd(item.Code, item))
+                {
+                    throw new InvalidOperationException(
+                        $"Duplicate code '{item.Code}' in {typeof(TVnum).Name}");
+                }
+
+                if (!ByCodeIgnoreCase.TryAdd(item.Code, item))
+                {
+                    throw new InvalidOperationException(
+                        $"Codes '{ByCodeIgnoreCase[item.Code].Code}' and '{item.Code}' in {typeof(TVnum).Name} differ only by case; " +
+                        "codes must be unique ignoring case");
+                }
             }
         }
     }

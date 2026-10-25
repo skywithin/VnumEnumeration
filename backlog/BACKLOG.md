@@ -53,7 +53,6 @@ Open items with `breaking: true`: they change the public API or documented behav
 
 | ID | Title | Type | Area | Priority | Size |
 |----|-------|------|------|----------|------|
-| BL-0001 | Fail fast on duplicate values and codes when the lookup table is built | enhancement | core | high | M |
 | BL-0002 | Reject values that are not declared enum members in the Vnum<TEnum> long constructor | enhancement | core | medium | S |
 | BL-0004 | Return IReadOnlyList<TVnum> from GetAll<TVnum>() | enhancement | core | low | S |
 | BL-0006 | JSON: treat an empty string as an invalid code instead of null, and remove the dead null branches | enhancement | serialization | low | S |
@@ -65,7 +64,6 @@ Open items with `breaking: true`: they change the public API or documented behav
 
 | ID | Title | Type | Area | Priority | Size |
 |----|-------|------|------|----------|------|
-| BL-0001 | Fail fast on duplicate values and codes when the lookup table is built | enhancement | core | high | M |
 | BL-0002 | Reject values that are not declared enum members in the Vnum<TEnum> long constructor | enhancement | core | medium | S |
 | BL-0008 | Multi-target net8.0 and net10.0 so LTS consumers can install the package | enhancement | packaging | medium | S |
 | BL-0004 | Return IReadOnlyList<TVnum> from GetAll<TVnum>() | enhancement | core | low | S |
@@ -96,4 +94,5 @@ Older completed items stay in `backlog/items/`; this table shows the most recent
 |----|-------|------|------|----------|------|
 | BUG-0002 | Vnum cannot be used as a JSON dictionary key: the converter lacks the property-name overrides | bug | serialization | medium | S |
 | BUG-0001 | A null public static field permanently disables the lookup cache, so every lookup runs reflection | bug | core | high | M |
+| BL-0001 | Fail fast on duplicate values and codes when the lookup table is built | enhancement | core | high | M |
 
