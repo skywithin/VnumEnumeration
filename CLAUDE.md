@@ -47,6 +47,8 @@ Versioning is driven by git tags, not the `<Version>` in the csproj (CI override
 - `v1.2.3` tag → `.github/workflows/build-and-publish.yml` builds, tests, and publishes `1.2.3` to NuGet.org.
 - `rc-v1.2.3` tag → `.github/workflows/pre-release-publish.yml` publishes `1.2.3-rc.<run_number>`.
 
+Both workflows publish through NuGet trusted publishing, not a stored API key: the `NuGet/login` step exchanges the job's GitHub OIDC token for an API key that lasts one hour. This depends on two things outside the repo: a trusted publishing policy on nuget.org for each workflow file (a policy names one repository and one workflow file name, so renaming a workflow file breaks publishing until its policy is updated), and the `NUGET_USER` repository secret holding the nuget.org profile name. A tag-triggered run uses the workflow file from the tagged commit.
+
 `README.md` at the repo root is packed into the NuGet package as its readme, so keep its API examples in sync when the public surface changes.
 
 `CHANGELOG.md` records every change a consumer can observe. Add an entry under "Unreleased" in the same change that makes it, with breaking changes under "Breaking". Read that section before tagging: if it lists breaking changes, the tag must be a new major version. When tagging, rename "Unreleased" to the version and date and start a new empty one.

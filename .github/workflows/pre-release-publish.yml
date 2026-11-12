@@ -8,7 +8,11 @@ on:
 jobs:
   pre-release-publish:
     runs-on: ubuntu-latest
-    
+
+    permissions:
+      contents: read
+      id-token: write  # lets the job request a GitHub OIDC token for NuGet trusted publishing
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -45,7 +49,13 @@ jobs:
     - name: Pack NuGet package
       run: dotnet pack src/VnumEnumeration/VnumEnumeration.csproj --configuration Release --no-build --output ./nupkgs -p:Version=${{ steps.set_version.outputs.VERSION }}
       
+    # Trusted publishing: exchanges the job's OIDC token for a NuGet API key that is valid for one hour.
+    # nuget.org needs a trusted publishing policy that names this repository and this workflow file.
+    - name: NuGet login (OIDC to temporary API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}  # nuget.org profile name, not the email address
+
     - name: Push to NuGet.org
-      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-      env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
