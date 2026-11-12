@@ -43,7 +43,7 @@ Tests (`tests/VnumEnumeration.Tests`, xUnit):
 
 ## Release process
 
-Versioning is driven by git tags, not the `<Version>` in the csproj (CI overrides it with `-p:Version=`):
+Versioning is driven by git tags. The csproj `<Version>` is a `0.0.0-dev` placeholder that is never bumped; CI passes the tag's version as `-p:Version=` to both `dotnet build` and `dotnet pack`. Pack runs with `--no-build`, so the build step must get the version too, or the DLLs in the package carry the placeholder:
 - `v1.2.3` tag → `.github/workflows/build-and-publish.yml` builds, tests, and publishes `1.2.3` to NuGet.org.
 - `rc-v1.2.3` tag → `.github/workflows/pre-release-publish.yml` publishes `1.2.3-rc.<run_number>`.
 

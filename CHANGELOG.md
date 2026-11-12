@@ -4,6 +4,10 @@ Changes to `Skywithin.VnumEnumeration` that a consumer of the package can observ
 
 ## Unreleased
 
+### Fixed
+
+- The assemblies in the package carry the package's version. Before, the DLLs in 10.2.0 reported `AssemblyVersion`, `FileVersion` and `InformationalVersion` 10.1.0, because CI set the version only when packing, not when building.
+
 ## 10.2.0 (2026-11-12)
 
 No breaking changes.

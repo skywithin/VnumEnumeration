@@ -41,7 +41,7 @@ jobs:
       run: dotnet restore VnumEnumeration.slnx
       
     - name: Build solution
-      run: dotnet build VnumEnumeration.slnx --configuration Release --no-restore
+      run: dotnet build VnumEnumeration.slnx --configuration Release --no-restore -p:Version=${{ steps.set_version.outputs.VERSION }}
       
     - name: Run tests
       run: dotnet test tests/VnumEnumeration.Tests/VnumEnumeration.Tests.csproj --configuration Release --no-build --verbosity normal
