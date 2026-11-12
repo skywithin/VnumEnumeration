@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/VnumEnumeration/VnumEnumeration.csproj" />
+    <Project Path="src/VnumEnumeration.Analyzers/VnumEnumeration.Analyzers.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/VnumEnumeration.Tests/VnumEnumeration.Tests.csproj" />

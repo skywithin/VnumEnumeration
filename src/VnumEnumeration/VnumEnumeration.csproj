@@ -33,4 +33,11 @@
     <None Include="icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The analyzer ships inside this package (analyzers/dotnet/cs) and runs in the consumer's compiler.
+         It is built first, but it is neither referenced by the library nor a package dependency. -->
+    <ProjectReference Include="..\VnumEnumeration.Analyzers\VnumEnumeration.Analyzers.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+    <None Include="..\VnumEnumeration.Analyzers\bin\$(Configuration)\netstandard2.0\VnumEnumeration.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
 </Project>

@@ -12,6 +12,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <!-- Compiles sample sources in the analyzer tests; the same version the analyzer is built against. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
@@ -22,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\VnumEnumeration\VnumEnumeration.csproj" />
+    <ProjectReference Include="..\..\src\VnumEnumeration.Analyzers\VnumEnumeration.Analyzers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -193,6 +193,27 @@ Vnums implement `IComparable<Vnum>` and order by `Value`, so `OrderBy(s => s)`, 
 
 The `Try*` lookup methods return `false` instead of throwing when no match is found.
 
+### Build-time warnings
+
+The package includes an analyzer that runs in your compiler and warns about Vnum declarations that work in this version but will throw in the next major version:
+
+| ID | Reported when |
+|---|---|
+| `VNUM001` | A public static field of the Vnum type is `null` |
+| `VNUM002` | The type is looked up from one of its own static field initializers before all of its public static fields are assigned, e.g. `Default = Vnum.FromValue<OrderStatus>(1)` |
+| `VNUM003` | Two instances share a value, share a code, or have codes that differ only by case |
+| `VNUM004` | A `Vnum<TEnum>` is constructed from a `long` value that is not a declared member of the enum (`[Flags]` enums excepted) |
+
+The analyzer sees constants only: literal or enum arguments that the Vnum's constructor passes straight to the base constructor. Values that are computed, or instances created by a factory method, are not checked.
+
+To fail the build instead of warning:
+
+```xml
+<PropertyGroup>
+  <WarningsAsErrors>$(WarningsAsErrors);VNUM001;VNUM002;VNUM003;VNUM004</WarningsAsErrors>
+</PropertyGroup>
+```
+
 ## Limitations
 
 - **No duplicate validation**: the library does not check that values or codes are unique. If two instances share a value or code, lookups return whichever is found first.

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-`Skywithin.VnumEnumeration` is a single-assembly NuGet library (targets `net8.0` and `net10.0`; the test project targets both too) that provides `Vnum`, a base class for "smart enum" / enumeration-class types (value + code pairs), plus a `System.Text.Json` converter. Root namespace: `Skywithin.VnumEnumeration`.
+`Skywithin.VnumEnumeration` is a NuGet library (one runtime assembly targeting `net8.0` and `net10.0`, plus a `netstandard2.0` Roslyn analyzer packed into the same package; the test project targets both frameworks) that provides `Vnum`, a base class for "smart enum" / enumeration-class types (value + code pairs), plus a `System.Text.Json` converter. Root namespace: `Skywithin.VnumEnumeration`.
 
 ## Commands
 
@@ -26,7 +26,7 @@ The solution file is the new XML `.slnx` format (requires a recent .NET SDK). Th
 
 ## Architecture
 
-All library code lives in two files:
+All runtime library code lives in two files:
 
 - `src/VnumEnumeration/Vnum.cs` — `Vnum` (non-generic base) and `Vnum<TEnum>` (enum-backed subclass).
   - Values are always stored as `long`. `Vnum<TEnum>` converts enums of any underlying integral type to/from `long` via `EnumToLong`/`LongToEnum`; `ulong` values above `long.MaxValue` throw `OverflowException`.
@@ -36,6 +36,8 @@ All library code lives in two files:
   - Trimming/AOT: `TVnum` carries `[DynamicallyAccessedMembers(PublicFields)]` on every public lookup method, on `Cache<TVnum>` and on the JSON converter, so the trimmer keeps the fields discovery reads. Keep the annotation on any new entry point that reaches the cache.
   - Equality and ordering are by runtime type + `Value` (not `Code`). `CompareTo` orders by `Value` within one runtime type, puts `null` first, and throws `ArgumentException` across types; there are no `<`/`>` operators.
 - `src/VnumEnumeration/Serialization/VnumJsonConverter.cs` — `VnumJsonConverter<TVnum>` writes the `Code` string; reads either a string code (case-sensitive) or a number (backward compatibility). Dictionary keys go through `WriteAsPropertyName`/`ReadAsPropertyName` and are codes only. Unknown codes on both paths throw through the private `InvalidCode` helper. `VnumJsonConverterFactory` handles every `Vnum` subtype so consumers register a single converter.
+
+The analyzer is one file, `src/VnumEnumeration.Analyzers/VnumDeclarationAnalyzer.cs`. It reports `VNUM001` to `VNUM004` as warnings for declarations the next major version will reject at runtime (null field, lookup in the type's own static initializer, duplicate value or code, undeclared enum value). It only uses what the compiler can prove: `TryResolve` follows a field initializer's constructor through its `base(...)`/`this(...)` chain to the Vnum base constructor and carries constant arguments along; anything computed is skipped, so the analyzer must never be the only check for a rule. It is built against `Microsoft.CodeAnalysis.CSharp` 4.8.0 (the .NET 8 SDK compiler) so every SDK that can consume the package can load it; do not raise that version without a reason. The library csproj packs the DLL under `analyzers/dotnet/cs` through a `ProjectReference` with `ReferenceOutputAssembly="false"`, so it is not a package dependency. `VnumDeclarationAnalyzerTests` compiles sample sources in memory and asserts on the exact diagnostic messages.
 
 Tests (`tests/VnumEnumeration.Tests`, xUnit):
 - `Data/TestData.cs` holds all sample Vnum types used across tests, including deliberately broken ones (e.g. `BadSampleVnum` is missing an enum member).
