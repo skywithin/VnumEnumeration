@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-`Skywithin.VnumEnumeration` is a single-assembly NuGet library (target `net10.0`) that provides `Vnum`, a base class for "smart enum" / enumeration-class types (value + code pairs), plus a `System.Text.Json` converter. Root namespace: `Skywithin.VnumEnumeration`.
+`Skywithin.VnumEnumeration` is a single-assembly NuGet library (targets `net8.0` and `net10.0`; the test project targets both too) that provides `Vnum`, a base class for "smart enum" / enumeration-class types (value + code pairs), plus a `System.Text.Json` converter. Root namespace: `Skywithin.VnumEnumeration`.
 
 ## Commands
 
@@ -15,6 +15,9 @@ dotnet test tests/VnumEnumeration.Tests/VnumEnumeration.Tests.csproj
 # Single test class / single test (xUnit)
 dotnet test tests/VnumEnumeration.Tests --filter "FullyQualifiedName~VnumJsonConverterTests"
 dotnet test tests/VnumEnumeration.Tests --filter "FullyQualifiedName~SampleVnumTests.SomeTestName"
+
+# One target framework only (the test project runs on net8.0 and net10.0 by default)
+dotnet test tests/VnumEnumeration.Tests -f net8.0
 
 dotnet pack src/VnumEnumeration/VnumEnumeration.csproj -c Release -p:Version=x.y.z
 ```
