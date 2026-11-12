@@ -37,10 +37,8 @@ public class VnumJsonConverter<TVnum> : JsonConverter<TVnum> where TVnum : Vnum
             {
                 return vnum;
             }
-            
-            throw new JsonException(
-                $"'{code}' is not a valid code for {typeof(TVnum).Name}. " +
-                $"Valid codes: {string.Join(", ", Vnum.GetAll<TVnum>().Select(v => v.Code).Take(20))}"); //Take 20 codes max (sanity check)
+
+            throw InvalidCode(code);
         }
         
         // Deserialize from numeric value (backward compatibility)
@@ -73,6 +71,34 @@ public class VnumJsonConverter<TVnum> : JsonConverter<TVnum> where TVnum : Vnum
         // Serialize as string code
         writer.WriteStringValue(vnum.Code);
     }
+
+    /// <summary>
+    /// Reads a dictionary key (JSON property name) as an instance of the specified <typeparamref name="TVnum"/> type.
+    /// Keys are matched by code, case-sensitively; numeric keys are not supported.
+    /// </summary>
+    public override TVnum ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var code = reader.GetString() ?? string.Empty;
+
+        if (Vnum.TryFromCode<TVnum>(code, ignoreCase: false, out var vnum))
+        {
+            return vnum;
+        }
+
+        throw InvalidCode(code);
+    }
+
+    /// <summary>
+    /// Writes the specified <typeparamref name="TVnum"/> code as a dictionary key (JSON property name).
+    /// </summary>
+    public override void WriteAsPropertyName(Utf8JsonWriter writer, TVnum vnum, JsonSerializerOptions options)
+    {
+        writer.WritePropertyName(vnum.Code);
+    }
+
+    private static JsonException InvalidCode(string code) =>
+        new($"'{code}' is not a valid code for {typeof(TVnum).Name}. " +
+            $"Valid codes: {string.Join(", ", Vnum.GetAll<TVnum>().Select(v => v.Code).Take(20))}"); // 20 codes max (sanity check)
 }
 
 /// <summary>
