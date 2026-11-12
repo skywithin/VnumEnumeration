@@ -197,6 +197,10 @@ The `Try*` lookup methods return `false` instead of throwing when no match is fo
 
 - .NET 10.0+
 
+### Trimming and native AOT
+
+The package is marked `IsAotCompatible`. Instance discovery reads public static fields by reflection, and every lookup method carries a `DynamicallyAccessedMembers(PublicFields)` annotation on its type parameter, so the trimmer keeps those fields for each Vnum type your code looks up. `VnumJsonConverterFactory` instantiates the converter over reference types only, which native AOT supports without extra code generation. This has been checked with a trimmed publish (`PublishTrimmed` with `TrimMode=full`); a native AOT publish has not been tested yet.
+
 ## Building from source
 
 ```bash

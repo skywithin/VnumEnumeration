@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -136,19 +137,19 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Retrieves all Vnum instances of a given type <typeparamref name="TVnum"/>.
     /// </summary>
-    public static IEnumerable<TVnum> GetAll<TVnum>() where TVnum : Vnum =>
+    public static IEnumerable<TVnum> GetAll<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum>() where TVnum : Vnum =>
         Cache<TVnum>.Get().Items;
 
     /// <summary>
     /// Retrieves all Vnum instances of a given type <typeparamref name="TVnum"/> that satisfy the specified predicate.
     /// </summary>
-    public static IEnumerable<TVnum> GetAll<TVnum>(Func<TVnum, bool> predicate) where TVnum : Vnum =>
+    public static IEnumerable<TVnum> GetAll<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum>(Func<TVnum, bool> predicate) where TVnum : Vnum =>
         Cache<TVnum>.Get().Items.Where(predicate);
 
     /// <summary>
     /// Retrieves a Vnum instance by its numeric value.
     /// </summary>
-    public static TVnum FromValue<TVnum>(long value) where TVnum : Vnum =>
+    public static TVnum FromValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum>(long value) where TVnum : Vnum =>
         TryFromValue<TVnum>(value, out var vnum)
             ? vnum
             : throw NotFound<TVnum>(value, nameof(value));
@@ -156,13 +157,13 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Attempts to retrieve a Vnum instance by its numeric value.
     /// </summary>
-    public static bool TryFromValue<TVnum>(long value, out TVnum vnum) where TVnum : Vnum =>
+    public static bool TryFromValue<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum>(long value, out TVnum vnum) where TVnum : Vnum =>
         TryGet(Cache<TVnum>.Get().ByValue, value, out vnum);
 
     /// <summary>
     /// Retrieves a Vnum instance by its enum value.
     /// </summary>
-    public static TVnum FromEnum<TVnum, TEnum>(TEnum value)
+    public static TVnum FromEnum<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum, TEnum>(TEnum value)
         where TVnum : Vnum<TEnum>
         where TEnum : struct, Enum
         => FromValue<TVnum>(Vnum<TEnum>.EnumToLong(value));
@@ -170,7 +171,7 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Attempts to retrieve a Vnum instance by its enum value.
     /// </summary>
-    public static bool TryFromEnum<TVnum, TEnum>(TEnum value, out TVnum vnum)
+    public static bool TryFromEnum<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum, TEnum>(TEnum value, out TVnum vnum)
         where TVnum : Vnum<TEnum>
         where TEnum : struct, Enum
         => TryFromValue(Vnum<TEnum>.EnumToLong(value), out vnum);
@@ -178,7 +179,7 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Retrieves a Vnum instance by its code.
     /// </summary>
-    public static TVnum FromCode<TVnum>(string code, bool ignoreCase = false) where TVnum : Vnum
+    public static TVnum FromCode<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum>(string code, bool ignoreCase = false) where TVnum : Vnum
     {
         ArgumentNullException.ThrowIfNull(code);
 
@@ -190,7 +191,7 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Attempts to retrieve a Vnum instance by its code.
     /// </summary>
-    public static bool TryFromCode<TVnum>(string code, bool ignoreCase, out TVnum vnum) where TVnum : Vnum
+    public static bool TryFromCode<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum>(string code, bool ignoreCase, out TVnum vnum) where TVnum : Vnum
     {
         if (code is null)
         {
@@ -205,7 +206,7 @@ public abstract class Vnum : IEquatable<Vnum>
     /// <summary>
     /// Attempts to retrieve a Vnum instance by its code (case sensitive).
     /// </summary>
-    public static bool TryFromCode<TVnum>(string code, out TVnum vnum) where TVnum : Vnum =>
+    public static bool TryFromCode<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum>(string code, out TVnum vnum) where TVnum : Vnum =>
         TryFromCode(code, ignoreCase: false, out vnum);
 
     private static bool TryGet<TKey, TVnum>(Dictionary<TKey, TVnum> map, TKey key, out TVnum vnum)
@@ -227,8 +228,10 @@ public abstract class Vnum : IEquatable<Vnum>
 
     /// <summary>
     /// Per-type cache of discovered instances and lookup tables, built with reflection on first use.
+    /// The PublicFields annotation tells the trimmer to keep TVnum's public static fields; every public
+    /// entry point repeats it so the requirement reaches consumers' call sites.
     /// </summary>
-    private static class Cache<TVnum> where TVnum : Vnum
+    private static class Cache<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum> where TVnum : Vnum
     {
         private static Lookup<TVnum>? _lookup;
 

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -7,7 +8,7 @@ namespace Skywithin.VnumEnumeration.Serialization;
 /// JSON converter for Vnum types that serializes to Code string and deserializes from Code or Value.
 /// Deserialization is case-sensitive by default.
 /// </summary>
-public class VnumJsonConverter<TVnum> : JsonConverter<TVnum> where TVnum : Vnum
+public class VnumJsonConverter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] TVnum> : JsonConverter<TVnum> where TVnum : Vnum
 {
     /// <summary>
     /// Reads and converts a JSON value to an instance of the specified <see cref="TVnum"/> type.
@@ -125,6 +126,10 @@ public class VnumJsonConverterFactory : JsonConverterFactory
     /// the converter.</remarks>
     /// <returns>A <see cref="JsonConverter"/> instance capable of converting the specified type,  or <see langword="null"/> if
     /// the converter cannot be created.</returns>
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "VnumJsonConverter<T> is only ever instantiated over reference types (T : Vnum), which share canonical generic code, so no new native code is required at runtime.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2071",
+        Justification = "A Vnum type reaching the serializer is one the application references; its public static fields are assigned by its static constructor, which the trimmer keeps together with the type.")]
     public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
         var converterType = typeof(VnumJsonConverter<>).MakeGenericType(typeToConvert);
