@@ -25,7 +25,7 @@ Install-Package Skywithin.VnumEnumeration
 ## Features
 
 - **Value and code**: every instance has a `long` value and a non-empty string code.
-- **Reflection-based discovery**: all instances of a type are found automatically and cached (thread-safe) after the first lookup.
+- **Reflection-based discovery**: all instances of a type are found automatically, validated (unique values and codes) and cached (thread-safe) after the first lookup.
 - **Flexible lookup**: find instances by value, code (optionally case-insensitive) or enum, with throwing and `Try*` variants.
 - **Enum-backed types**: `Vnum<TEnum>` ties a Vnum to an enum of any underlying integral type (`byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`).
 - **JSON serialization**: a `System.Text.Json` converter factory that writes codes and reads codes or numeric values.
@@ -172,6 +172,8 @@ Several fields that reference the same instance (e.g. `public static readonly Or
 
 Discovery runs once per type; the results are cached for the lifetime of the process. Lookups by value and code are dictionary-based.
 
+Values and codes must be unique within a type, and codes must also be unique ignoring case (so that `ignoreCase: true` lookups are unambiguous). A violation throws `InvalidOperationException` from the first lookup on that type, naming the type and the clashing members. Calling `Vnum.GetAll<T>()` in a unit test is enough to assert a type is well-formed.
+
 Every public static field of the Vnum type must hold an instance when the first lookup runs. A `null` field throws `InvalidOperationException` naming the field. That rules out two things:
 
 - a `null` sentinel such as `public static readonly OrderStatus? None = null;` (make it non-public, or use a real instance)
@@ -190,6 +192,7 @@ Vnums implement `IComparable<Vnum>` and order by `Value`, so `OrderBy(s => s)`, 
 | Situation | Exception |
 |---|---|
 | `FromValue` / `FromCode` / `FromEnum` finds no match | `InvalidOperationException` |
+| Two instances of a type share a value, share a code, or have codes that differ only by case (thrown by the first lookup on that type) | `InvalidOperationException` |
 | A public static field of the Vnum type is `null` when the first lookup on that type runs | `InvalidOperationException` |
 | `FromCode` called with `null` | `ArgumentNullException` |
 | `CompareTo` called with an instance of a different Vnum type | `ArgumentException` |
@@ -201,7 +204,6 @@ The `Try*` lookup methods return `false` instead of throwing when no match is fo
 
 ## Limitations
 
-- **No duplicate validation**: the library does not check that values or codes are unique. If two instances share a value or code, lookups return whichever is found first.
 - **`ulong` overflow**: `ulong` enum values greater than `long.MaxValue` throw `OverflowException`.
 
 ## Supported frameworks
