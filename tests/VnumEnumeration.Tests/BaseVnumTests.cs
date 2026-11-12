@@ -461,4 +461,89 @@ public class BaseVnumTests
         Assert.False(sampleVnum == badSampleVnum);
         Assert.True(sampleVnum != badSampleVnum);
     }
+
+    [Fact]
+    public void OrderBy_Instance_Should_Sort_By_Value()
+    {
+        // Arrange: includes 0 and long.MaxValue, which a subtraction-based compare would overflow on
+        var shuffled = new[] { TestLongVnum.MaxValue, TestLongVnum.Zero, TestLongVnum.Large, TestLongVnum.Small };
+
+        // Act
+        var sorted = shuffled.OrderBy(v => v).ToList();
+
+        // Assert
+        Assert.Equal([TestLongVnum.Zero, TestLongVnum.Small, TestLongVnum.Large, TestLongVnum.MaxValue], sorted);
+    }
+
+    [Fact]
+    public void SortedSet_Should_Order_By_Value()
+    {
+        // Act
+        var set = new SortedSet<TestVnum1> { TestVnum1.OptionTwo, TestVnum1.OptionOne };
+
+        // Assert
+        Assert.Equal([TestVnum1.OptionOne, TestVnum1.OptionTwo], set);
+    }
+
+    [Fact]
+    public void Array_Sort_Should_Order_By_Value()
+    {
+        // Arrange
+        var array = new[] { SampleVnum.Two, SampleVnum.One };
+
+        // Act
+        Array.Sort(array);
+
+        // Assert
+        Assert.Equal([SampleVnum.One, SampleVnum.Two], array);
+    }
+
+    [Fact]
+    public void CompareTo_Should_Compare_By_Value()
+    {
+        Assert.True(TestVnum1.OptionOne.CompareTo(TestVnum1.OptionTwo) < 0);
+        Assert.True(TestVnum1.OptionTwo.CompareTo(TestVnum1.OptionOne) > 0);
+        Assert.Equal(0, TestVnum1.OptionOne.CompareTo(TestVnum1.OptionOne));
+    }
+
+    [Fact]
+    public void CompareTo_Same_Value_Different_Code_Should_Be_Zero_Like_Equals()
+    {
+        // Arrange
+        var stub = TestVnum1.Stub(1, "BBBB");
+
+        // Act & Assert: ordering agrees with equality, which ignores Code
+        Assert.Equal(0, stub.CompareTo(TestVnum1.OptionOne));
+        Assert.True(stub.Equals(TestVnum1.OptionOne));
+    }
+
+    [Fact]
+    public void CompareTo_Null_Should_Be_Positive()
+    {
+        Assert.True(TestVnum1.OptionOne.CompareTo(null) > 0);
+    }
+
+    [Fact]
+    public void CompareTo_Different_Types_Should_Throw()
+    {
+        // Act
+        var ex = Assert.Throws<ArgumentException>(() => SampleVnum.One.CompareTo(BadSampleVnum.One));
+
+        // Assert
+        Assert.Equal("other", ex.ParamName);
+        Assert.StartsWith("Cannot compare SampleVnum with BadSampleVnum: Vnums are only ordered within one type.", ex.Message);
+    }
+
+    [Fact]
+    public void NonGeneric_CompareTo_Should_Handle_Vnum_Null_And_Other_Objects()
+    {
+        // Arrange
+        IComparable comparable = TestVnum1.OptionOne;
+
+        // Act & Assert
+        Assert.True(comparable.CompareTo(TestVnum1.OptionTwo) < 0);
+        Assert.True(comparable.CompareTo(null) > 0);
+        var ex = Assert.Throws<ArgumentException>(() => comparable.CompareTo("OptionOne"));
+        Assert.Equal("obj", ex.ParamName);
+    }
 }

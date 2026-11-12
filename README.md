@@ -176,12 +176,17 @@ Discovery runs once per type; the results are cached for the lifetime of the pro
 
 Two Vnums are equal when they have the same runtime type and the same `Value`. `Code` is not part of equality or hashing. `==` and `!=` follow the same rules.
 
+### Ordering
+
+Vnums implement `IComparable<Vnum>` and order by `Value`, so `OrderBy(s => s)`, `SortedSet<T>` and `Array.Sort` work directly. Every instance sorts after `null`. Comparing instances of two different Vnum types throws `ArgumentException`, because ordering, like equality, is scoped to one type. There are no `<` or `>` operators; use `CompareTo` or compare `Value`.
+
 ### Errors
 
 | Situation | Exception |
 |---|---|
 | `FromValue` / `FromCode` / `FromEnum` finds no match | `InvalidOperationException` |
 | `FromCode` called with `null` | `ArgumentNullException` |
+| `CompareTo` called with an instance of a different Vnum type | `ArgumentException` |
 | Constructor called with a null, empty or whitespace code | `ArgumentException` |
 | `Vnum<TEnum>` constructed with a `long` value that doesn't fit the enum's underlying type | `ArgumentOutOfRangeException` |
 | JSON contains an unknown code or value | `JsonException` |
