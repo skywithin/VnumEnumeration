@@ -19,7 +19,7 @@ dotnet test tests/VnumEnumeration.Tests --filter "FullyQualifiedName~SampleVnumT
 dotnet pack src/VnumEnumeration/VnumEnumeration.csproj -c Release -p:Version=x.y.z
 ```
 
-The solution file is the new XML `.slnx` format (requires a recent .NET SDK). There is no separate lint step; the library builds with `Nullable` enabled and `GenerateDocumentationFile`, so public members need XML doc comments to avoid CS1591 warnings.
+The solution file is the new XML `.slnx` format (requires a recent .NET SDK). There is no separate lint step; the library builds with `Nullable` enabled and `GenerateDocumentationFile`, so public members need XML doc comments to avoid CS1591 warnings. The csproj sets `IsAotCompatible` and lists the IL2xxx/IL3xxx trim/AOT analyzer codes in `WarningsAsErrors`, so unannotated reflection fails the build.
 
 ## Architecture
 
@@ -27,8 +27,10 @@ All library code lives in two files:
 
 - `src/VnumEnumeration/Vnum.cs` — `Vnum` (non-generic base) and `Vnum<TEnum>` (enum-backed subclass).
   - Values are always stored as `long`. `Vnum<TEnum>` converts enums of any underlying integral type to/from `long` via `EnumToLong`/`LongToEnum`; `ulong` values above `long.MaxValue` throw `OverflowException`.
-  - Instance discovery is reflection-based: `GetAllVnums` reads **public static, DeclaredOnly** fields whose type is assignable to the Vnum type. Private static fields and fields on base classes are intentionally not discovered (see `PrivateVnum` in test data). Results are cached per type in a static `ConcurrentDictionary` that is never invalidated.
-  - All lookups (`FromValue`, `FromCode`, `FromEnum`) go through the private `Parse` helper, which throws `InvalidOperationException` with the message format `"'{value}' is not a valid {value|code} in {TypeName}"` — tests assert on this exact text. The `TryFrom*` variants wrap the throwing versions and catch only `ArgumentException`/`ArgumentNullException`/`InvalidOperationException`.
+  - Instance discovery is reflection-based and lives in the nested `Cache<TVnum>.Build`: it reads **public static, DeclaredOnly** fields whose type is assignable to the Vnum type, deduplicates aliased fields by reference, and skips fields whose value is null. Private static fields and fields on base classes are intentionally not discovered (see `PrivateVnum` in test data). The result is an immutable `Lookup<TVnum>` holding the item list and three dictionaries (by value, by code ordinal, by code ignore-case), filled with `TryAdd`: when values or codes are duplicated, the instance declared first wins and nothing throws.
+  - The built table is published with `Volatile.Write` and never invalidated, but only when no discovered field was null. A null field is taken to mean the lookup was made from inside the type's own static initializer (see `ReentrantVnum` in test data): the partial table is returned for that call and not cached, so the next call after initialization sees the full set. Known limitation: a field that is genuinely null looks the same, so such a type is never cached and every lookup re-runs reflection.
+  - Lookups: the `TryFrom*` methods do the dictionary lookup and never throw (`TryFromCode(null, ...)` returns false). The throwing `FromValue`/`FromCode`/`FromEnum` wrap them and throw `InvalidOperationException` via `NotFound` with the message format `"'{value}' is not a valid {value|code} in {TypeName}"` — tests assert on this exact text. `FromCode(null)` throws `ArgumentNullException`. `FromEnum`/`TryFromEnum` convert the enum to `long` and defer to the value lookup.
+  - Trimming/AOT: `TVnum` carries `[DynamicallyAccessedMembers(PublicFields)]` on every public lookup method, on `Cache<TVnum>` and on the JSON converter, so the trimmer keeps the fields discovery reads. Keep the annotation on any new entry point that reaches the cache.
   - Equality is by runtime type + `Value` (not `Code`).
 - `src/VnumEnumeration/Serialization/VnumJsonConverter.cs` — `VnumJsonConverter<TVnum>` writes the `Code` string; reads either a string code (case-sensitive) or a number (backward compatibility). Dictionary keys go through `WriteAsPropertyName`/`ReadAsPropertyName` and are codes only. Unknown codes on both paths throw through the private `InvalidCode` helper. `VnumJsonConverterFactory` handles every `Vnum` subtype so consumers register a single converter.
 
