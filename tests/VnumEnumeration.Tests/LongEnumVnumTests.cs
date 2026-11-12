@@ -138,6 +138,7 @@ public class LongEnumVnumTests
         
         var json = "5000000000";
         var vnum = JsonSerializer.Deserialize<TestLongVnum>(json, options);
+        Assert.NotNull(vnum);
         
         Assert.Equal(LongEnum.VeryLarge, vnum.Id);
         Assert.Equal("verylarge", vnum.Code);
@@ -152,6 +153,7 @@ public class LongEnumVnumTests
         
         var json = long.MaxValue.ToString();
         var vnum = JsonSerializer.Deserialize<TestLongVnum>(json, options);
+        Assert.NotNull(vnum);
         
         Assert.Equal(LongEnum.MaxValue, vnum.Id);
         Assert.Equal("maxvalue", vnum.Code);
