@@ -48,3 +48,5 @@ Versioning is driven by git tags, not the `<Version>` in the csproj (CI override
 - `rc-v1.2.3` tag → `.github/workflows/pre-release-publish.yml` publishes `1.2.3-rc.<run_number>`.
 
 `README.md` at the repo root is packed into the NuGet package as its readme, so keep its API examples in sync when the public surface changes.
+
+`CHANGELOG.md` records every change a consumer can observe. Add an entry under "Unreleased" in the same change that makes it, with breaking changes under "Breaking". Read that section before tagging: if it lists breaking changes, the tag must be a new major version. When tagging, rename "Unreleased" to the version and date and start a new empty one.

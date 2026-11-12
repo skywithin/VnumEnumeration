@@ -196,6 +196,7 @@ The `Try*` lookup methods return `false` instead of throwing when no match is fo
 ## Limitations
 
 - **No duplicate validation**: the library does not check that values or codes are unique. If two instances share a value or code, lookups return whichever is found first.
+- **Null fields disable caching**: if a Vnum type declares a public static field of its own type whose value is `null` (e.g. a `None` sentinel), the lookup table for that type is never cached and every lookup re-runs reflection. Make such a field non-public.
 - **`ulong` overflow**: `ulong` enum values greater than `long.MaxValue` throw `OverflowException`.
 
 ## Supported frameworks
