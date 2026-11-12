@@ -15,17 +15,31 @@ public class VnumDiscoveryTests
     }
 
     [Fact]
-    public void Lookup_During_Static_Initialization_Should_Not_Corrupt_Cache()
+    public void Lookup_During_Static_Initialization_Should_Throw()
     {
-        // Act
-        var defaultValue = ReentrantVnum.Default;
-        var two = Vnum.FromValue<ReentrantVnum>(2);
-        var all = Vnum.GetAll<ReentrantVnum>().ToList();
+        // Act: the lookup runs inside the static initializer, so the failure surfaces as a type-load error
+        var ex = Assert.Throws<TypeInitializationException>(() => ReentrantVnum.One);
 
         // Assert
-        Assert.Same(ReentrantVnum.One, defaultValue);
-        Assert.Same(ReentrantVnum.Two, two);
-        Assert.Equal([ReentrantVnum.One, ReentrantVnum.Two], all);
+        var inner = Assert.IsType<InvalidOperationException>(ex.InnerException);
+        Assert.StartsWith("Public static field 'ReentrantVnum.", inner.Message);
+    }
+
+    [Fact]
+    public void Null_Static_Field_Should_Throw_On_Every_Lookup()
+    {
+        // Act
+        var ex = Assert.Throws<InvalidOperationException>(() => Vnum.GetAll<NullFieldVnum>());
+
+        // Assert
+        Assert.Equal(
+            "Public static field 'NullFieldVnum.None' is null. " +
+            "Every public static NullFieldVnum field must hold an instance when the first lookup runs; " +
+            "a null field, or a lookup made from inside the type's own static initializer, is not supported",
+            ex.Message);
+
+        // A failed build is not cached, so the next lookup fails the same way
+        Assert.Throws<InvalidOperationException>(() => Vnum.TryFromValue<NullFieldVnum>(1, out _));
     }
 
     [Fact]

@@ -239,25 +239,27 @@ public abstract class Vnum : IEquatable<Vnum>, IComparable<Vnum>, IComparable
 
         private static Lookup<TVnum> Build()
         {
+            // A null field is either declared null or not assigned yet, because the lookup was made from
+            // inside TVnum's own static initializer. The two look identical from here, and a table cached
+            // in the second case would be missing instances for good, so both are rejected.
             var values = typeof(TVnum)
                 .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .Where(f => typeof(TVnum).IsAssignableFrom(f.FieldType))
-                .Select(f => (TVnum?)f.GetValue(null))
+                .Select(f => (TVnum?)f.GetValue(null) ?? throw NullField(f))
                 .ToArray();
 
-            var lookup = new Lookup<TVnum>(values.OfType<TVnum>().Distinct<TVnum>(ReferenceEqualityComparer.Instance));
+            var lookup = new Lookup<TVnum>(values.Distinct<TVnum>(ReferenceEqualityComparer.Instance));
 
-            // A null field means we were called while TVnum's static initializer is still running
-            // (e.g. from one of its own field initializers). Return the partial result for this call,
-            // but don't cache it, so later calls see the fully initialized set.
-            if (values.All(v => v is not null))
-            {
-                // Concurrent builders produce equivalent lookups, so whichever write wins is fine.
-                Volatile.Write(ref _lookup, lookup);
-            }
+            // Concurrent builders produce equivalent lookups, so whichever write wins is fine.
+            Volatile.Write(ref _lookup, lookup);
 
             return lookup;
         }
+
+        private static InvalidOperationException NullField(FieldInfo field) =>
+            new($"Public static field '{typeof(TVnum).Name}.{field.Name}' is null. " +
+                $"Every public static {typeof(TVnum).Name} field must hold an instance when the first lookup runs; " +
+                "a null field, or a lookup made from inside the type's own static initializer, is not supported");
     }
 
     private sealed class Lookup<TVnum> where TVnum : Vnum

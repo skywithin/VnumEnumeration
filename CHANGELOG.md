@@ -4,6 +4,13 @@ Changes to `Skywithin.VnumEnumeration` that a consumer of the package can observ
 
 ## Unreleased
 
+Contains breaking changes: the next release needs a new major version.
+
+### Breaking
+
+- **A `null` public static field on a Vnum type now throws.** The first lookup on the type throws `InvalidOperationException` naming the field. Before, such a type worked but rebuilt its lookup table by reflection on every call. Make the field non-public, or give it a real instance.
+- **A lookup from inside a Vnum type's own static initializer now fails.** `public static readonly OrderStatus Default = Vnum.FromValue<OrderStatus>(1);` fails at type load with a `TypeInitializationException`, because `Default` is still unassigned when the lookup runs. Reference the field instead: `Default = Pending`. This and the previous entry are one rule: a null field and a not-yet-assigned field cannot be told apart reliably, and guessing wrong would silently lose instances, so both are rejected.
+
 ## 10.2.0 (2026-11-12)
 
 No breaking changes.

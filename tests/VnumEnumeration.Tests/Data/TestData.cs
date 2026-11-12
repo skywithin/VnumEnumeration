@@ -77,11 +77,21 @@ public sealed class ReentrantVnum : Vnum
 
     public static readonly ReentrantVnum One = new(1, "one");
 
-    // Looks up an instance while the type's static initializer is still running,
-    // before Two has been assigned
+    // Deliberately broken: looks up an instance while the type's static initializer is still
+    // running, before Default and Two have been assigned. The lookup throws, so the type never loads.
     public static readonly ReentrantVnum Default = FromValue<ReentrantVnum>(1);
 
     public static readonly ReentrantVnum Two = new(2, "two");
+}
+
+public sealed class NullFieldVnum : Vnum
+{
+    private NullFieldVnum(int value, string code) : base(value, code) { }
+
+    public static readonly NullFieldVnum One = new(1, "one");
+
+    // Deliberately broken: a null public static field is rejected by the first lookup
+    public static readonly NullFieldVnum? None = null;
 }
 
 public enum ByteId : byte

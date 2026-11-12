@@ -172,6 +172,11 @@ Several fields that reference the same instance (e.g. `public static readonly Or
 
 Discovery runs once per type; the results are cached for the lifetime of the process. Lookups by value and code are dictionary-based.
 
+Every public static field of the Vnum type must hold an instance when the first lookup runs. A `null` field throws `InvalidOperationException` naming the field. That rules out two things:
+
+- a `null` sentinel such as `public static readonly OrderStatus? None = null;` (make it non-public, or use a real instance)
+- a lookup from inside the type's own static initializer, such as `public static readonly OrderStatus Default = Vnum.FromValue<OrderStatus>(1);`, because `Default` is still unassigned when the lookup runs. Reference the field instead: `Default = Pending`. Here the exception arrives wrapped in a `TypeInitializationException`.
+
 ### Equality
 
 Two Vnums are equal when they have the same runtime type and the same `Value`. `Code` is not part of equality or hashing. `==` and `!=` follow the same rules.
@@ -185,6 +190,7 @@ Vnums implement `IComparable<Vnum>` and order by `Value`, so `OrderBy(s => s)`, 
 | Situation | Exception |
 |---|---|
 | `FromValue` / `FromCode` / `FromEnum` finds no match | `InvalidOperationException` |
+| A public static field of the Vnum type is `null` when the first lookup on that type runs | `InvalidOperationException` |
 | `FromCode` called with `null` | `ArgumentNullException` |
 | `CompareTo` called with an instance of a different Vnum type | `ArgumentException` |
 | Constructor called with a null, empty or whitespace code | `ArgumentException` |
@@ -196,7 +202,6 @@ The `Try*` lookup methods return `false` instead of throwing when no match is fo
 ## Limitations
 
 - **No duplicate validation**: the library does not check that values or codes are unique. If two instances share a value or code, lookups return whichever is found first.
-- **Null fields disable caching**: if a Vnum type declares a public static field of its own type whose value is `null` (e.g. a `None` sentinel), the lookup table for that type is never cached and every lookup re-runs reflection. Make such a field non-public.
 - **`ulong` overflow**: `ulong` enum values greater than `long.MaxValue` throw `OverflowException`.
 
 ## Supported frameworks
