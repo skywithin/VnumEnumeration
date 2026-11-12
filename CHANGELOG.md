@@ -4,6 +4,8 @@ Changes to `Skywithin.VnumEnumeration` that a consumer of the package can observ
 
 ## Unreleased
 
+## 10.2.0 (2026-11-12)
+
 No breaking changes.
 
 ### Added
