@@ -14,6 +14,10 @@
          analyzer warnings, so a new unannotated reflection call fails the build. -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
+    <!-- On GitHub Actions: deterministic paths in the PDB and Source Link, so the package does not
+         carry the build machine's folders and two builds of one commit are identical. -->
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+
     <!-- NuGet Package Metadata -->
     <PackageId>Skywithin.VnumEnumeration</PackageId>
     <!-- Placeholder for local builds, deliberately not a real release number. CI passes the version from the
