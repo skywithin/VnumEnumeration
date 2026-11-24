@@ -45,9 +45,11 @@ Tests (`tests/VnumEnumeration.Tests`, xUnit):
 
 Versioning is driven by git tags. The csproj `<Version>` is a `0.0.0-dev` placeholder that is never bumped; CI passes the tag's version as `-p:Version=` to both `dotnet build` and `dotnet pack`. Pack runs with `--no-build`, so the build step must get the version too, or the DLLs in the package carry the placeholder:
 - `v1.2.3` tag → `.github/workflows/build-and-publish.yml` builds, tests, and publishes `1.2.3` to NuGet.org.
-- `rc-v1.2.3` tag → `.github/workflows/pre-release-publish.yml` publishes `1.2.3-rc.<run_number>`.
+- `rc-v1.2.3` tag → the same workflow publishes `1.2.3-rc.<run_number>`.
 
-Both workflows publish through NuGet trusted publishing, not a stored API key: the `NuGet/login` step exchanges the job's GitHub OIDC token for an API key that lasts one hour. This depends on two things outside the repo: a trusted publishing policy on nuget.org for each workflow file (a policy names one repository and one workflow file name, so renaming a workflow file breaks publishing until its policy is updated), and the `NUGET_USER` repository secret holding the nuget.org profile name. A tag-triggered run uses the workflow file from the tagged commit.
+The workflow publishes through NuGet trusted publishing, not a stored API key: the `NuGet/login` step exchanges the job's GitHub OIDC token for an API key that lasts one hour. This depends on two things outside the repo: a trusted publishing policy on nuget.org for the workflow file (a policy names one repository and one workflow file name, so renaming the file breaks publishing until its policy is updated; that is why releases and pre-releases share one file), and the `NUGET_USER` repository secret holding the nuget.org profile name. A tag-triggered run uses the workflow file from the tagged commit. The push uses `--skip-duplicate`, so rerunning a failed run never publishes a version twice.
+
+`.github/workflows/ci.yml` builds and tests every push to `main` and every pull request; the publish workflow runs only on tags. Both take the SDK from `global.json` (pinned, latest patch only) plus the .NET 8 runtime for the `net8.0` tests. On GitHub Actions the library builds with `ContinuousIntegrationBuild`, so the package's PDB paths are deterministic.
 
 `README.md` at the repo root is packed into the NuGet package as its readme, so keep its API examples in sync when the public surface changes.
 

@@ -1,0 +1,40 @@
+name: CI
+
+# Build and test every push to main and every pull request, so a break shows up when it is made
+# rather than at the next release tag. Publishing is build-and-publish.yml, on version tags only.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # The SDK comes from global.json; the 8.0 runtime is for the net8.0 test run.
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore VnumEnumeration.slnx
+
+    - name: Build solution
+      run: dotnet build VnumEnumeration.slnx --configuration Release --no-restore
+
+    - name: Run tests
+      run: dotnet test tests/VnumEnumeration.Tests/VnumEnumeration.Tests.csproj --configuration Release --no-build --verbosity normal
